@@ -1,0 +1,24 @@
+###################
+# BUILD FOR PRODUCTION
+###################
+
+FROM node:20-alpine As builder
+
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN yarn install
+COPY . .
+RUN yarn build
+# RUN yarn ci --only=production && yarn cache clean --force
+
+
+###################
+# PRODUCTION
+###################
+
+FROM node:20-alpine As production
+
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/dist ./dist
+
+CMD [ "node", "dist/main.js" ]
