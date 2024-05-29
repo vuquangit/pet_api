@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
-import { postgresqlConfig, typeOrm } from '@/configs';
+import { mailerConfig, postgresqlConfig, typeOrm } from '@/configs';
 
 import { AuthModule } from '@/modules/auth/auth.module';
 import { UsersModule } from '@/modules/users/users.module';
+import { MailingModule } from '@/modules/mailing/mailing.module';
 
 @Module({
   imports: [
@@ -17,11 +19,12 @@ import { UsersModule } from '@/modules/users/users.module';
       load: [typeOrm],
     }),
     TypeOrmModule.forRootAsync(postgresqlConfig),
+    MailerModule.forRootAsync(mailerConfig),
 
     // modules
     AuthModule,
     UsersModule,
-    // MailingModule,
+    MailingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
