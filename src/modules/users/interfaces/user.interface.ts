@@ -7,8 +7,3 @@ export interface IUser {
   password?: string;
   role: ERole;
 }
-
-export interface IUserToken {
-  accessToken: string;
-  refreshToken: string;
-}

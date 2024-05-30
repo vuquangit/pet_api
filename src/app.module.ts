@@ -10,6 +10,7 @@ import { mailerConfig, postgresqlConfig, typeOrm } from '@/configs';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { UsersModule } from '@/modules/users/users.module';
 import { MailingModule } from '@/modules/mailing/mailing.module';
+import { OauthModule } from '@/modules/oauth/oauth.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MailingModule } from '@/modules/mailing/mailing.module';
 
     // modules
     AuthModule,
+    OauthModule,
     UsersModule,
     MailingModule,
   ],

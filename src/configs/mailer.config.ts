@@ -53,6 +53,7 @@ export const mailerConfig: MailerAsyncOptions = {
     defaults: {
       from: `"nest-modules" <${process.env.MAIL_FROM}>`, // outgoing email ID
     },
+    // preview: true,
     template: {
       dir: join(__dirname, 'mail', 'templates'),
       adapter: new HandlebarsAdapter({

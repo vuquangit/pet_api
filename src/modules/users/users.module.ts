@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HttpModule } from '@nestjs/axios';
 
@@ -7,15 +7,15 @@ import { UsersController } from './users.controller';
 import { User } from './entity/user.entity';
 
 import { AuthModule } from '@/modules/auth/auth.module';
-// import { MailingModule } from '@/modules/mailing/mailing.module';
+import { MailingModule } from '@/modules/mailing/mailing.module';
 // import { UploadModule } from '@/modules/upload/upload.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
-    AuthModule,
+    forwardRef(() => AuthModule),
     HttpModule,
-    // MailingModule,
+    MailingModule,
     // UploadModule,
   ],
   controllers: [UsersController],

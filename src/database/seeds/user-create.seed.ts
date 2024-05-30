@@ -7,7 +7,12 @@ import { ERole } from '@/modules/users/enums/role.enum';
 
 export class UserCreateSeed implements Seeder {
   public async run(factory: Factory): Promise<void> {
-    const password = await bcrypt.hash(process.env.SEED_PASSWORD_OWNER, 12);
+    const saltLength = +(process.env.BCRYPT_SALT || 12);
+
+    const password = await bcrypt.hash(
+      process.env.SEED_PASSWORD_OWNER,
+      saltLength,
+    );
 
     await factory(User)().create({
       name: 'Owner',
