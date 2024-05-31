@@ -61,20 +61,4 @@ export class CreateUserDto {
     default: null,
   })
   end_date: Date | null;
-
-  // skip error in User entity ?
-  @ApiProperty({
-    default: null,
-  })
-  created_at: Date | null;
-
-  @ApiProperty({
-    default: null,
-  })
-  updated_at: Date | null;
-
-  @ApiProperty({
-    default: null,
-  })
-  id: string;
 }

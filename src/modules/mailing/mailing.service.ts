@@ -1,4 +1,3 @@
-import { from, Observable, EMPTY } from 'rxjs';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -12,137 +11,96 @@ export class MailingService {
     private readonly mailerService: MailerService,
   ) {}
 
-  testMail(email: string): any {
+  async testMail(email: string): Promise<boolean> {
     try {
-      return from(
-        this.mailerService.sendMail({
-          to: email, // list of receivers
-          from: `"Pet" <${this.configService.get<string>('MAIL_USER')}>`, // sender address
-          subject: 'Pet - Test mail', // Subject line
-          template: 'test/index',
-          context: {
-            title: 'Test mail',
-          },
-        }),
-      );
-    } catch (error) {}
-  }
+      await this.mailerService.sendMail({
+        to: email, // list of receivers
+        from: `"Pet" <${this.configService.get<string>('MAIL_USER')}>`, // sender address
+        subject: 'Pet - Test mail', // Subject line
+        template: 'test/index',
+        context: {
+          title: 'Test mail',
+        },
+      });
 
-  createdUser(user: User): Observable<any> {
-    if (!user.email) return EMPTY;
-
-    try {
-      return from(
-        this.mailerService.sendMail({
-          to: user.email,
-          from: `"Pet" <${this.configService.get<string>('MAIL_USER')}>`, // override default from
-          subject: 'Pet - Welcome',
-          template: 'auth/create-user',
-          context: {
-            name: user?.name || '',
-            urlLogin: this.configService.get<string>('WEB_URL'),
-          },
-        }),
-      );
+      return true;
     } catch (error) {
-      console.log('Send mail error:', error);
-      return EMPTY;
+      return error;
     }
   }
 
-  forgotPassword(email: string): Observable<any> {
-    if (!email) return EMPTY;
-
-    const urlForgotPassword =
-      this.configService.get<string>('WEB_URL') + '/forgot-password?token=';
-    if (!urlForgotPassword) return EMPTY;
+  async createdUser(user: User): Promise<boolean> {
+    if (!user.email) return false;
 
     try {
-      return from(
-        this.mailerService.sendMail({
-          to: email,
-          from: `"Pet - No Reply" <${this.configService.get<string>('MAIL_USER')}>`, // override default from
-          subject: 'Pet - Forgot Password',
-          template: 'auth/forgot-password',
-          context: {
-            name: email,
-            urlForgotPassword,
-          },
-        }),
-      );
-    } catch (error) {
-      console.log('Send mail error:', error);
-      return EMPTY;
-    }
-  }
-
-  sendUserConfirmation(user: User, password: string): Observable<any> {
-    if (!user.email) return EMPTY;
-
-    return from(
-      this.mailerService.sendMail({
+      await this.mailerService.sendMail({
         to: user.email,
         from: `"Pet" <${this.configService.get<string>('MAIL_USER')}>`, // override default from
-        subject: 'Pet - Your password',
-        // template: 'auth/confirm', // `.hbs` extension is appended automatically
-        // context: {
-        //   email: user.email,
-        //   password,
-        // },
-        text: 'Create password',
-        html: `
-          <h2>Hello new user</h2>
-          <p>Login URL: ${this.configService.get<string>(
-            'MAIL_WEB_LOGIN_URL',
-          )}</p>
-          <p>Email: ${user.email}</p>
-          <p>Password: ${password}</p>
-          `,
-      }),
-    );
+        subject: 'Pet - Welcome',
+        template: 'auth/create-user',
+        context: {
+          name: user?.name || '',
+          urlLogin: this.configService.get<string>('WEB_URL'),
+        },
+      });
+
+      return true;
+    } catch (error) {
+      return error;
+    }
   }
 
-  sendNewPassword(email: string, newPassword: string): Observable<any> {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    if (!email) return;
+  async sendPasswordReset(
+    email: string,
+    token: string,
+    expiresIn: string,
+  ): Promise<boolean> {
+    if (!email || !token) return false;
 
-    return from(
-      this.mailerService.sendMail({
+    console.log('email', email, token);
+
+    const urlForgotPassword =
+      this.configService.get<string>('WEB_URL') +
+      '/forgot-password?token=' +
+      token;
+
+    try {
+      await this.mailerService.sendMail({
         to: email,
-        from: `"Pet" <${this.configService.get<string>('MAIL_USER')}>`, // override default from
-        subject: 'Pet - Mật khẩu mới',
-        text: 'Mật khẩu mới',
-        html: `
-          <h2>Mật khẩu mới</h2>
-          <p>Link đăng nhập: ${this.configService.get<string>(
-            'MAIL_WEB_LOGIN_URL',
-          )}</p>
-          <p>Email: ${email}</p>
-          <p>Mật khẩu: ${newPassword}</p>
-          `,
-      }),
-    );
+        from: `"Pet - No Reply" <${this.configService.get<string>('MAIL_USER')}>`,
+        subject: 'Pet - Forgot Password',
+        template: 'auth/forgot-password',
+        context: {
+          email,
+          urlForgotPassword,
+          expiresIn,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      return error;
+    }
   }
 
-  sendNotiChangedPassword(email: string): Observable<any> {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    if (!email) return;
+  async sendNotiChangedPassword(email: string): Promise<boolean> {
+    if (!email) return false;
 
-    // try {
-    return from(
-      this.mailerService.sendMail({
+    try {
+      await this.mailerService.sendMail({
         to: email,
-        from: `"Pet" <${this.configService.get<string>('MAIL_USER')}>`, // override default from
-        subject: 'Pet - Thay đổi mật khẩu',
-        text: 'Thay đổi mật khẩu',
-        html: `
-          <h2>Thay đổi mật khẩu</h2>
-          <p>Bạn vừa đổi mật khẩu mới thành công</p>
-          `,
-      }),
-    );
-    // } catch {}
+        from: `"Pet - No Reply" <${this.configService.get<string>('MAIL_USER')}>`,
+        subject: 'Pet - Changed Password',
+        template: 'auth/changed-password',
+        context: {
+          email,
+          urlLogin: this.configService.get<string>('WEB_URL'),
+        },
+      });
+
+      return true;
+    } catch (error) {
+      return error;
+    }
   }
 }

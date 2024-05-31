@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Body,
   Controller,
@@ -14,8 +13,6 @@ import {
   UploadedFile,
   ParseBoolPipe,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { UpdateResult } from 'typeorm';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { CreateUserDto } from '@/modules/users/dtos/CreateUser.dto';
@@ -24,6 +21,7 @@ import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 import { UsersService } from '@/modules/users/users.service';
 import { User } from '@/modules/users/entity/user.entity';
 import { PageDto } from '@/common/dtos/page.dto';
+import { UpdateResult } from '@/common/interfaces/common.interface';
 
 @Controller()
 @UseGuards(AccessTokenGuard)
@@ -43,7 +41,7 @@ export class UsersController {
     @UploadedFile() avatar: any,
     @Body('role', ParseIntPipe) role: number,
     @Body('is_active', ParseBoolPipe) is_active: boolean,
-  ): Observable<User> {
+  ): Promise<User> {
     return this.userService.create({
       ...createdUserDto,
       role,
@@ -56,16 +54,13 @@ export class UsersController {
   findAll(
     @Query() query?: any,
     // @Request() req?: any,
-  ): Observable<PageDto<User[]>> {
+  ): Promise<PageDto<User[]>> {
     // const user = req.user;
     return this.userService.findAll(query);
   }
 
   @Get('user/:id')
-  findUser(
-    @Param('id') id: string,
-    @Query('include') include: string,
-  ): Observable<User | null> {
+  findUser(@Param('id') id: string): Promise<User | null> {
     return this.userService.findById(id);
   }
 
@@ -84,7 +79,7 @@ export class UsersController {
     @Body('role', ParseIntPipe) role: any,
     @Body('is_active', ParseBoolPipe) is_active: boolean,
     @Body('is_delete_avatar', ParseBoolPipe) is_delete_avatar: boolean,
-  ): Observable<UpdateResult> {
+  ): Promise<UpdateResult> {
     return this.userService.update(id, {
       ...updateUserDto,
       role,
@@ -95,7 +90,7 @@ export class UsersController {
   }
 
   @Delete('user/:id')
-  remove(@Param('id') id: string): Observable<any> {
-    return this.userService.remove(id);
+  async remove(@Param('id') id: string): Promise<UpdateResult> {
+    return await this.userService.remove(id);
   }
 }

@@ -6,11 +6,8 @@ import {
   forwardRef,
   Inject,
 } from '@nestjs/common';
-import { from, Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
-// import { HttpService } from '@nestjs/axios';
+import { Repository } from 'typeorm';
 
 // dtos
 import { CreateUserDto } from '@/modules/users/dtos/CreateUser.dto';
@@ -26,6 +23,7 @@ import { MailingService } from '@/modules/mailing/mailing.service';
 import { EXCEPTION_CODE } from '@/constants/exceptionCode';
 import { ERole } from './enums/role.enum';
 import { getMeta } from '@/utils/pagination';
+import { UpdateResult } from '@/common/interfaces/common.interface';
 
 @Injectable()
 export class UsersService {
@@ -35,178 +33,210 @@ export class UsersService {
 
     @Inject(forwardRef(() => AuthService)) private authService: AuthService,
 
-    // private httpService: HttpService,
     private mailService: MailingService,
     // private uploadService: UploadService,
   ) {}
 
   // USERS
-  create(createdUserDto: CreateUserDto): Observable<any> {
-    return this.mailExists(createdUserDto.email).pipe(
-      switchMap((exists: boolean) => {
-        // mail exists
-        if (exists) {
-          throw new ConflictException({
-            code: EXCEPTION_CODE.USER.EMAIL_EXIST,
-            message: 'Email already in use',
-          });
-        }
+  async create(createdUserDto: CreateUserDto): Promise<any> {
+    const isExist = await this.mailExists(createdUserDto.email);
 
-        // role invalid
-        if (!ERole[createdUserDto.role]) {
-          throw new BadRequestException({
-            code: EXCEPTION_CODE.USER.ROLE_INVALID,
-            message: 'Role is invalid',
-          });
-        }
+    // mail exists
+    if (isExist) {
+      throw new ConflictException({
+        code: EXCEPTION_CODE.USER.EMAIL_EXIST,
+        message: 'Email already in use',
+      });
+    }
 
-        const passwordUser =
-          createdUserDto.password || this.authService.randomPassword();
+    // role invalid
+    if (!ERole[createdUserDto.role]) {
+      throw new BadRequestException({
+        code: EXCEPTION_CODE.USER.ROLE_INVALID,
+        message: 'Role is invalid',
+      });
+    }
 
-        return this.authService.hashPassword(passwordUser).pipe(
-          switchMap((passwordHash: string) => {
-            // Overwrite the user password with the hash, to store it in the db
-            createdUserDto.password = passwordHash;
+    const passwordUser =
+      createdUserDto.password || this.authService.randomPassword();
 
-            ['birthday', 'start_date', 'end_date'].forEach(
-              (fieldDate: keyof CreateUserDto) => {
-                if (createdUserDto[fieldDate] === 'null')
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
-                  createdUserDto[fieldDate] = null;
-              },
-            );
+    const passwordHash = await this.authService.hashPassword(passwordUser);
 
-            // upload avatar
-            if (createdUserDto.avatar) {
-              // TODO: upload image
-              const avatar_url = '';
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const { avatar, ...restUserDto } = createdUserDto;
-              const user: User = { ...restUserDto, avatar_url } as User;
-              return this.saveUser(user);
+    // Overwrite the user password with the hash, to store it in the db
+    createdUserDto.password = passwordHash;
 
-              // return this.uploadService.uploadImage(createdUserDto.avatar).pipe(
-              //   switchMap((data: any) => {
-              //     createdUserDto.avatar_url = data.image_url;
-              //     delete createdUserDto.avatar;
-              //     return this.saveUser(createdUserDto, passwordUser);
-              //   }),
-              // );
-            } else {
-              return this.saveUser(createdUserDto as User);
-            }
-          }),
-        );
-      }),
+    ['birthday', 'start_date', 'end_date'].forEach(
+      (fieldDate: keyof CreateUserDto) => {
+        if (createdUserDto[fieldDate] === 'null')
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          createdUserDto[fieldDate] = null;
+      },
     );
+
+    // upload avatar
+    if (createdUserDto.avatar) {
+      // TODO: upload image
+      const avatar_url = '';
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { avatar, ...restUserDto } = createdUserDto;
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const user: User = { ...restUserDto, avatar_url };
+      return await this.saveUser(user);
+
+      // return this.uploadService.uploadImage(createdUserDto.avatar).pipe(
+      //   switchMap((data: any) => {
+      //     createdUserDto.avatar_url = data.image_url;
+      //     delete createdUserDto.avatar;
+      //     return this.saveUser(createdUserDto, passwordUser);
+      //   }),
+      // );
+    } else {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      return await this.saveUser(createdUserDto as User);
+    }
   }
 
-  private saveUser(createdUserDto: User) {
+  private async saveUser(createdUserDto: User): Promise<User> {
     const newUser = this.usersRepository.create(createdUserDto);
+    const savedUser = await this.usersRepository.save(newUser);
 
     // send mail
-    return from(this.usersRepository.save(newUser)).pipe(
-      map((savedUser: User) => {
-        // send mail
-        // TODO: check mail send is success
-        this.mailService.createdUser(savedUser);
+    // TODO: check mail send is success
+    await this.mailService.createdUser(savedUser);
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { password, ...user } = savedUser;
-        return user;
-      }),
-    );
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...user } = savedUser;
+    return user as User;
   }
 
-  update(id: string, updateUserDto: CreateUserDto): Observable<UpdateResult> {
-    return from(this.usersRepository.findOneBy({ id: id })).pipe(
-      switchMap((user: User) => {
-        if (!user) {
-          throw new NotFoundException({
-            code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-            message: `A user id '"${id}"' was not found`,
-          });
-        }
+  async update(
+    id: string,
+    updateUserDto: CreateUserDto,
+  ): Promise<UpdateResult> {
+    const userFound = await this.usersRepository.findOneBy({ id: id });
 
-        return this.mailExists(updateUserDto.email, user.email).pipe(
-          switchMap((exists: boolean) => {
-            if (exists) {
-              throw new ConflictException({
-                code: EXCEPTION_CODE.USER.EMAIL_EXIST,
-                message: 'Email already in use',
-              });
-            }
+    if (!userFound) {
+      throw new NotFoundException({
+        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
+        message: `A user id '"${id}"' was not found`,
+      });
+    }
 
-            ['birthday', 'start_date', 'end_date'].forEach(
-              (fieldDate: keyof CreateUserDto) => {
-                if (updateUserDto[fieldDate] === 'null')
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
-                  updateUserDto[fieldDate] = null;
-              },
-            );
+    const isExist = await this.mailExists(updateUserDto.email, userFound.email);
 
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { avatar, is_delete_avatar, ...restUser } = updateUserDto;
+    if (isExist) {
+      throw new ConflictException({
+        code: EXCEPTION_CODE.USER.EMAIL_EXIST,
+        message: 'Email already in use',
+      });
+    }
 
-            return this.usersRepository.update(id, restUser as User);
-
-            // // TODO: upload avatar
-            // if (updateUserDto.avatar) {
-            //   return this.uploadService.uploadImage(updateUserDto.avatar).pipe(
-            //     switchMap((data: any) => {
-            //       // TODO: delete image ?
-            //       this.uploadService.deleteImage([updateUserDto.avatar_url]);
-
-            //       updateUserDto.avatar_url = data.image_url;
-            //       delete updateUserDto.avatar;
-            //       delete updateUserDto.is_delete_avatar;
-
-            //       return this.usersRepository.update(id, updateUserDto);
-            //     }),
-            //   );
-            // } else {
-            //   // TODO: delete image
-            //   if (updateUserDto.is_delete_avatar) {
-            //     this.uploadService.deleteImage([updateUserDto.avatar_url]);
-            //     updateUserDto.avatar_url = null;
-            //   }
-
-            //   delete updateUserDto.is_delete_avatar;
-
-            //   return this.usersRepository.update(id, updateUserDto);
-            // }
-          }),
-        );
-      }),
+    ['birthday', 'start_date', 'end_date'].forEach(
+      (fieldDate: keyof CreateUserDto) => {
+        if (updateUserDto[fieldDate] === 'null')
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          updateUserDto[fieldDate] = null;
+      },
     );
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { avatar, is_delete_avatar, ...restUser } = updateUserDto;
+
+    const updateResult = await this.usersRepository.update(
+      id,
+      restUser as User,
+    );
+
+    if (!updateResult.affected) {
+      throw new NotFoundException({
+        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
+        message: `A user id '"${id}"' was not found`,
+      });
+    }
+
+    return { success: true };
+
+    // // TODO: upload avatar
+    // if (updateUserDto.avatar) {
+    //   return this.uploadService.uploadImage(updateUserDto.avatar).pipe(
+    //     switchMap((data: any) => {
+    //       // TODO: delete image ?
+    //       this.uploadService.deleteImage([updateUserDto.avatar_url]);
+
+    //       updateUserDto.avatar_url = data.image_url;
+    //       delete updateUserDto.avatar;
+    //       delete updateUserDto.is_delete_avatar;
+
+    //       return this.usersRepository.update(id, updateUserDto);
+    //     }),
+    //   );
+    // } else {
+    //   // TODO: delete image
+    //   if (updateUserDto.is_delete_avatar) {
+    //     this.uploadService.deleteImage([updateUserDto.avatar_url]);
+    //     updateUserDto.avatar_url = null;
+    //   }
+
+    //   delete updateUserDto.is_delete_avatar;
+
+    //   return this.usersRepository.update(id, updateUserDto);
+    // }
   }
 
-  remove(id: string): Observable<any> {
+  async remove(id: string): Promise<UpdateResult> {
     // TODO: delete avatar
 
-    return from(this.usersRepository.delete(id));
+    const deleteResult = await this.usersRepository.delete(id);
+
+    if (!deleteResult.affected) {
+      throw new NotFoundException({
+        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
+        message: `A user id '"${id}"' was not found`,
+      });
+    }
+
+    return { success: true };
   }
 
-  updatePassword(userData: User): Observable<any> {
+  async updatePassword(userData: User): Promise<boolean> {
     const userId = userData.id;
 
-    return from(this.usersRepository.update(userId, userData)).pipe(
-      switchMap((): any => {
-        return this.findById(userId).pipe(
-          map((userById: User) => {
-            this.mailService.sendNotiChangedPassword(userById.email);
+    await this.usersRepository.update(userId, userData);
 
-            return true;
-          }),
-        );
-      }),
-    );
+    const userFound = await this.findById(userId);
+    if (!userFound) {
+      throw new NotFoundException({
+        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
+        message: 'ID not found',
+      });
+    }
+    await this.mailService.sendNotiChangedPassword(userFound.email);
+
+    return true;
+  }
+
+  async updateResetToken(
+    userId: string,
+    resetToken: string,
+    resetTokenExpiry: Date,
+  ): Promise<void> {
+    const user = await this.findById(userId);
+    if (user) {
+      user.reset_token = resetToken;
+      user.reset_token_expiry = resetTokenExpiry; // 1 hour from now
+      await this.usersRepository.update(user.id, user);
+    } else {
+      throw new Error('User not found');
+    }
   }
 
   // methods
-  findAll(query: any): Observable<PageDto<User[]>> {
+  async findAll(query: any): Promise<PageDto<User[]>> {
     const sortBy = query.sort_by || 'created_at';
     const order = query.sort || 'DESC';
     const page = query.page;
@@ -217,27 +247,22 @@ export class UsersService {
       relations: {},
       order: { [sortBy]: order },
     };
-
     if (page && limit) {
       options['skip'] = (page - 1) * limit;
       options['take'] = limit;
     }
-
     options['where'] = {};
 
-    return from(this.usersRepository.findAndCount(options)).pipe(
-      map(([data, count]) => {
-        const meta = getMeta(query, count, data.length);
+    const [data, count] = await this.usersRepository.findAndCount(options);
+    const meta = getMeta(query, count, data.length);
 
-        return {
-          data: data,
-          meta,
-        };
-      }),
-    );
+    return {
+      data: data,
+      meta,
+    };
   }
 
-  findById(id: string): Observable<User | null> {
+  async findById(id: string): Promise<User | null> {
     if (!id) {
       throw new NotFoundException({
         code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
@@ -245,15 +270,12 @@ export class UsersService {
       });
     }
 
-    return from(
-      this.usersRepository.findOne({
-        where: { id: id },
-        // relations: {},
-      }),
-    );
+    return await this.usersRepository.findOne({
+      where: { id: id },
+    });
   }
 
-  findByRole(role: ERole): Observable<User[]> {
+  async findByRole(role: ERole): Promise<User[]> {
     if (!role) {
       throw new NotFoundException({
         code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
@@ -261,30 +283,24 @@ export class UsersService {
       });
     }
 
-    return from(
-      this.usersRepository.find({
-        where: { role: role },
-      }),
-    );
+    return await this.usersRepository.find({
+      where: { role: role },
+    });
   }
 
-  findUserByEmail(email: string): Observable<User | null> {
-    return from(
-      this.usersRepository.findOne({
-        select: ['id', 'password'],
-        where: { email: email },
-      }),
-    );
+  async findUserByEmail(email: string): Promise<User | null> {
+    return await this.usersRepository.findOne({
+      select: ['id', 'password', 'reset_token', 'reset_token_expiry'],
+      where: { email: email },
+    });
   }
 
-  private mailExists(
+  private async mailExists(
     email: string,
     excludeEmail?: string,
-  ): Observable<boolean> {
-    if (email === excludeEmail) return of(false);
+  ): Promise<boolean> {
+    if (email === excludeEmail) return false;
 
-    return from(this.usersRepository.findOneBy({ email })).pipe(
-      map((user: User) => !!user),
-    );
+    return !!(await this.usersRepository.findOneBy({ email }));
   }
 }

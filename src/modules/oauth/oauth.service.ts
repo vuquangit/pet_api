@@ -3,7 +3,6 @@ import { HttpService } from '@nestjs/axios';
 
 import { OauthLoginEmailDto } from '@/modules/oauth/dtos/OauthLogin.dto';
 import { EXCEPTION_CODE } from '@/constants/exceptionCode';
-import { firstValueFrom } from 'rxjs';
 import { IUserToken } from '@/modules/auth/interfaces/auth.interface';
 import { UsersService } from '@/modules/users/users.service';
 import { AuthService } from '@/modules/auth/auth.service';
@@ -90,7 +89,7 @@ export class OauthService {
     }
 
     const email = googleUser.email;
-    const user = await firstValueFrom(this.userService.findUserByEmail(email));
+    const user = await this.userService.findUserByEmail(email);
 
     if (!user) {
       throw new NotFoundException({
@@ -99,7 +98,7 @@ export class OauthService {
       });
     }
 
-    return await firstValueFrom(this.authService.generateTokens(user));
+    return await this.authService.generateTokens(user);
   }
 
   async oauthLoginByAuth({
@@ -118,7 +117,7 @@ export class OauthService {
     }
 
     const _email = googleUser.email;
-    const user = await firstValueFrom(this.userService.findUserByEmail(_email));
+    const user = await this.userService.findUserByEmail(_email);
 
     if (!user) {
       throw new NotFoundException({
@@ -127,6 +126,6 @@ export class OauthService {
       });
     }
 
-    return await firstValueFrom(this.authService.generateTokens(user));
+    return await this.authService.generateTokens(user);
   }
 }

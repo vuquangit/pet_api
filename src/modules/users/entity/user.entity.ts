@@ -68,6 +68,12 @@ export class User {
   @Column({ type: 'timestamp', onUpdate: 'CURRENT_TIMESTAMP', nullable: true })
   updated_at: Date;
 
+  @Column({ nullable: true, select: false })
+  reset_token: string;
+
+  @Column({ nullable: true, type: 'timestamp', select: false })
+  reset_token_expiry: Date;
+
   // @Column({ name: 'shop_id' })
   // shop_id: string;
 

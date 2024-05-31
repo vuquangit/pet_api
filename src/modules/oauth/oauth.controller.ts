@@ -38,8 +38,8 @@ export class OauthController {
 
     try {
       const tokens = await this.oauthService.oauthGoogle(code, redirectUri);
-      const { accessToken, refreshToken } = tokens;
-      const query = `access_token=${accessToken}&refresh_token=${refreshToken}`;
+      const { access_token, refresh_token } = tokens;
+      const query = `access_token=${access_token}&refresh_token=${refresh_token}`;
       const url = `${process.env.WEB_URL}/login?${query}`;
 
       res.redirect(301, url);
