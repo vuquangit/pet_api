@@ -61,7 +61,7 @@ export class MailingService {
 
     const urlForgotPassword =
       this.configService.get<string>('WEB_URL') +
-      '/forgot-password?token=' +
+      '/auth/reset-password?token=' +
       token;
 
     try {
