@@ -4,6 +4,7 @@ export const EXCEPTION_CODE = {
   },
   OAUTH: {
     CODE_NOT_FOUND: 'OAUTH.CODE_NOT_FOUND',
+    ERROR: 'OAUTH.ERROR',
   },
   USER: {
     EMAIL_NOT_FOUND: 'USER.EMAIL_NOT_FOUND',

@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 
-import { OauthLoginEmailDto } from '@/modules/oauth/dtos/OauthLogin.dto';
 import { EXCEPTION_CODE } from '@/constants/exceptionCode';
 import { IUserToken } from '@/modules/auth/interfaces/auth.interface';
 import { UsersService } from '@/modules/users/users.service';
 import { AuthService } from '@/modules/auth/auth.service';
+import { User } from '@/modules/users/entity/user.entity';
 
 @Injectable()
 export class OauthService {
@@ -101,25 +101,8 @@ export class OauthService {
     return await this.authService.generateTokens(user);
   }
 
-  async oauthLoginByAuth({
-    id_token,
-    access_token_oauth,
-  }: OauthLoginEmailDto): Promise<IUserToken> {
-    const googleUser = await this.getGoogleUser({
-      id_token,
-      access_token: access_token_oauth,
-    });
-    if (!googleUser?.verified_email) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.EMAIL_NOT_FOUND,
-        message: 'Email not found',
-      });
-    }
-
-    const _email = googleUser.email;
-    const user = await this.userService.findUserByEmail(_email);
-
-    if (!user) {
+  async oauthLoginCallback(user: any): Promise<IUserToken> {
+    if (!user?.email) {
       throw new NotFoundException({
         code: EXCEPTION_CODE.USER.EMAIL_NOT_FOUND,
         message: 'Email not found',
@@ -127,5 +110,12 @@ export class OauthService {
     }
 
     return await this.authService.generateTokens(user);
+  }
+
+  async validateUser(profile: any): Promise<User | null> {
+    // Implement your user validation logic here
+    // Typically, you'd check if the user exists in your database and create one if not
+    const _email = profile?.emails[0]?.value;
+    return await this.userService.findUserByEmail(_email);
   }
 }

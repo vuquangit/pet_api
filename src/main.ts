@@ -17,7 +17,13 @@ async function bootstrap() {
   const prefix = configService.get<string>('API_PREFIX') || '/api/v1';
 
   app.setGlobalPrefix(prefix);
-  app.enableCors();
+  app.enableCors({
+    // origin: 'http://localhost:3000', // Your frontend URL
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    // credentials: true, // Allow cookies to be sent
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+  });
   app.useGlobalInterceptors(new HttpResponseInterceptor());
   app.useGlobalInterceptors(new ExceptionInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
