@@ -53,7 +53,7 @@ export class UsersController {
   @Get('users')
   findAll(
     @Query() query?: any,
-    // @Request() req?: any,
+    // @Request() req?: { user: User },
   ): Promise<PageDto<User[]>> {
     // const user = req.user;
     return this.userService.findAll(query);

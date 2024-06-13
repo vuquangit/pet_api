@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  // JoinColumn,
-  // ManyToOne,
-  // OneToMany,
-} from 'typeorm';
+import { Column, Entity, ObjectId, ObjectIdColumn } from 'typeorm';
 import { IsDate } from 'class-validator';
 
 import { ERole } from '../enums/role.enum';
@@ -14,8 +7,8 @@ import { ERole } from '../enums/role.enum';
 
 @Entity({ name: 'users' })
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @ObjectIdColumn()
+  _id: ObjectId;
 
   @Column({
     unique: true,
@@ -85,4 +78,8 @@ export class User {
 
   // @OneToMany(() => Notification, (noti) => noti.user)
   // notifications: Notification[];
+
+  // constructor(user?: Partial<User>) {
+  //   Object.assign(this, user);
+  // }
 }

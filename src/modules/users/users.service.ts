@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ObjectId } from 'mongodb';
 
 // dtos
 import { CreateUserDto } from '@/modules/users/dtos/CreateUser.dto';
@@ -117,7 +118,9 @@ export class UsersService {
     id: string,
     updateUserDto: CreateUserDto,
   ): Promise<UpdateResult> {
-    const userFound = await this.usersRepository.findOneBy({ id: id });
+    const userFound = await this.usersRepository.findOneBy({
+      _id: new ObjectId(id),
+    });
 
     if (!userFound) {
       throw new NotFoundException({
@@ -204,7 +207,7 @@ export class UsersService {
   }
 
   async updatePassword(userData: User): Promise<boolean> {
-    const userId = userData.id;
+    const userId = userData._id.toString();
 
     await this.usersRepository.update(userId, userData);
 
@@ -229,7 +232,7 @@ export class UsersService {
     if (user) {
       user.reset_token = resetToken;
       user.reset_token_expiry = resetTokenExpiry; // 1 hour from now
-      await this.usersRepository.update(user.id, user);
+      await this.usersRepository.update(user._id, user);
     } else {
       throw new Error('User not found');
     }
@@ -270,9 +273,11 @@ export class UsersService {
       });
     }
 
-    return await this.usersRepository.findOne({
-      where: { id: id },
+    const user = await this.usersRepository.findOne({
+      where: { _id: new ObjectId(id) },
     });
+
+    return user;
   }
 
   async findByRole(role: ERole): Promise<User[]> {
@@ -291,7 +296,7 @@ export class UsersService {
   async findUserByEmail(email: string): Promise<User | null> {
     return await this.usersRepository.findOne({
       select: [
-        'id',
+        '_id',
         'password',
         'email',
         'role',
