@@ -242,8 +242,8 @@ export class UsersService {
   async findAll(query: any): Promise<PageDto<User[]>> {
     const sortBy = query.sort_by || 'created_at';
     const order = query.sort || 'DESC';
-    const page = query.page;
-    const limit = query.limit;
+    const page = +query.page;
+    const limit = +query.limit;
     // const role = user.role;
 
     const options: any = {
