@@ -9,11 +9,14 @@ dotenvConfig({ path: '.env' });
 
 const config: TypeOrmModuleOptions = {
   type: 'mongodb',
-  host: process.env.MONGO_DB_HOST,
-  database: process.env.MONGO_DB_DATABASE,
-  port: +(process?.env?.MONGO_DB_PORT || 27017),
-  // username: process.env.MONGO_DB_USER,
-  // password: process.env.MONGO_DB_PASSWORD,
+  url: process.env.MONGO_DB_URI,
+  // ssl: true,
+  // sslValidate: true,
+  // sslCA: [process.env.MONGO_DB_SSL_CA],
+  // sslCert: process.env.MONGO_DB_SSL_CERT,
+  // sslKey: process.env.MONGO_DB_SSL_KEY,
+  // sslPass: process.env.MONGO_DB_SSL_PASS,
+  // sslCRL: process.env.MONGO_DB_SSL_CRL,
 
   // Migration
   entities: [User],
