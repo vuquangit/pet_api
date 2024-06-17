@@ -1,0 +1,124 @@
+name: CI/CD STAGING
+
+on:
+  push:
+    branches:
+      - staging
+
+env:
+  NODE_VERSION: 20
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_ENV: staging
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{env.NODE_VERSION}}
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Jest run
+        id: jest
+        run: yarn test
+        continue-on-error: true
+
+      - name: Set message if code frontend fail
+        if: steps.cypress.outcome == 'failure'
+        run: echo "fe_failed_message=[NEWS] Some test in frontend fail" >> $GITHUB_ENV
+
+      - name: Notify to slack if code fail
+        if: steps.cypress.outcome == 'failure'
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL:  pet-bots
+          SLACK_COLOR:    '#ff0000'
+          SLACK_ICON:     https://www.petisland.icu/favicon.ico
+          SLACK_MESSAGE:  ${{ env.fe_failed_message }}
+          SLACK_TITLE:    CI Message
+          SLACK_USERNAME: Pet NEWS - Github Action
+          SLACK_WEBHOOK:  ${{ secrets.SLACK_WEBHOOK }}
+
+      # Break CI pipeline when error occur
+      - name: Exit if fail
+        if: steps.cypress.outcome == 'failure'
+        run: exit 1
+
+  cd:
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.ref == 'refs/heads/staging' && success()
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: |
+          cp .env.example .env
+          echo WEB_URL=${{ secrets.WEB_URL_STG }} >> .env
+          echo JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }} >> .env
+          echo JWT_ACCESS_SECRET_EXPIRES=${{ secrets.JWT_ACCESS_SECRET_EXPIRES }} >> .env
+          echo JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} >> .env
+          echo JWT_REFRESH_SECRET_EXPIRES=${{ secrets.JWT_REFRESH_SECRET_EXPIRES }} >> .env
+          echo BCRYPT_SALT=${{ secrets.BCRYPT_SALT }} >> .env
+          echo MONGO_DB_URI=${{ secrets.MONGO_DB_URI_STG }} >> .env
+          echo SEED_EMAIL_OWNER=${{ secrets.SEED_EMAIL_OWNER }} >> .env
+          echo SEED_PASSWORD_OWNER=${{ secrets.SEED_PASSWORD_OWNER }} >> .env
+          echo MAIL_HOST=${{ secrets.MAIL_HOST }} >> .env
+          echo MAIL_PORT=${{ secrets.MAIL_PORT }} >> .env
+          echo MAIL_PASS=${{ secrets.MAIL_PASS }} >> .env
+          echo GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} >> .env
+          echo GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} >> .env
+
+      - name: Install Vercel CLI
+        run: yarn global add vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Set message env for success or failure
+      - if: success()
+        name: Set message for success
+        run: |
+          echo "message=Congratulations on your successful release for staging backend :rocket:" >> $GITHUB_ENV
+          echo "message_color=good" >> $GITHUB_ENV
+
+      - if: failure()
+        name: Set message for failure
+        run: |
+          echo "message=Release staging backend failed, Please try again or release manually :uongtra:" >> $GITHUB_ENV
+          echo "message_color=danger" >> $GITHUB_ENV
+
+      # Noti to slack for sucess or failure
+      - name: Notify to slack
+        if: always()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL:  pet-bots
+          SLACK_COLOR:    ${{ env.message_color }}
+          SLACK_ICON:     https://www.petisland.icu/favicon.ico
+          SLACK_MESSAGE:  ${{ env.message }}
+          SLACK_TITLE:    CD Message
+          SLACK_USERNAME: Pet NEWS - Github Action
+          SLACK_WEBHOOK:  ${{ secrets.SLACK_WEBHOOK }}
