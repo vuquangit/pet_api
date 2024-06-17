@@ -32,9 +32,9 @@ jobs:
         run: yarn test
         continue-on-error: true
 
-      - name: Set message if code frontend fail
+      - name: Set message if code PRODUCTION backend fail
         if: steps.cypress.outcome == 'failure'
-        run: echo "fe_failed_message=[NEWS] Some test in frontend fail" >> $GITHUB_ENV
+        run: echo "fe_failed_message=[NEWS] Some test in PRODUCTION backend fail" >> $GITHUB_ENV
 
       - name: Notify to slack if code fail
         if: steps.cypress.outcome == 'failure'
@@ -98,13 +98,13 @@ jobs:
       - if: success()
         name: Set message for success
         run: |
-          echo "message=Congratulations on your successful release for PRODUCTION :rocket:" >> $GITHUB_ENV
+          echo "message=Congratulations on your successful release for PRODUCTION backend :rocket:" >> $GITHUB_ENV
           echo "message_color=good" >> $GITHUB_ENV
 
       - if: failure()
         name: Set message for failure
         run: |
-          echo "message=Release PRODUCTION failed, Please try again or release manually :uongtra:" >> $GITHUB_ENV
+          echo "message=Release PRODUCTION backend failed, Please try again or release manually :uongtra:" >> $GITHUB_ENV
           echo "message_color=danger" >> $GITHUB_ENV
 
       # Noti to slack for sucess or failure
