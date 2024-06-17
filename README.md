@@ -32,6 +32,32 @@
 $ yarn install
 ```
 
+## Migrations
+
+```bash
+# Create a migration
+$ npm run migration:create --name=foo
+
+# Generate a migration from schema changes
+$ npm run migration:generate --name=pet
+
+# Run migrations and checks for schema changes
+$ npm run migration:run
+
+# Revert migrations
+$ npm run migration:revert
+```
+
+## Seed data
+
+```bash
+# Create a seed config
+$ npm run seed:config
+
+# Run seed data
+$ npm run seed:run
+```
+
 ## Running the app
 
 ```bash
@@ -56,6 +82,13 @@ $ yarn run test:e2e
 
 # test coverage
 $ yarn run test:cov
+```
+
+## Docs api
+
+```bash
+# Swagger
+$ http://localhost:8080/api/docs
 ```
 
 ## Support
