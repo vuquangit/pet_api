@@ -16,5 +16,8 @@
     "deploymentEnabled": {
       "my-branch-name": false
     }
-  }
+  },
+  "rewrites": [
+    {"source": "/(.*)", "destination": "/"}
+  ]
 }

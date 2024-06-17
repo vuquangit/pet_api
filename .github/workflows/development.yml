@@ -72,7 +72,7 @@ jobs:
           echo JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} >> .env
           echo JWT_REFRESH_SECRET_EXPIRES=${{ secrets.JWT_REFRESH_SECRET_EXPIRES }} >> .env
           echo BCRYPT_SALT=${{ secrets.BCRYPT_SALT }} >> .env
-          echo MONGO_DB_URI=${{ secrets.MONGO_DB_URI }} >> .env
+          echo MONGO_DB_URI=${{ secrets.MONGO_DB_URI_DEV }} >> .env
           echo SEED_EMAIL_OWNER=${{ secrets.SEED_EMAIL_OWNER }} >> .env
           echo SEED_PASSWORD_OWNER=${{ secrets.SEED_PASSWORD_OWNER }} >> .env
           echo MAIL_HOST=${{ secrets.MAIL_HOST }} >> .env
