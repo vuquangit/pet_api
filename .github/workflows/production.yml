@@ -64,7 +64,7 @@ jobs:
 
       - name: Setup environment
         run: |
-          cp .env.sample .env
+          cp .env.example .env
           echo WEB_URL=${{ secrets.WEB_URL }} >> .env
           echo JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }} >> .env
           echo JWT_ACCESS_SECRET_EXPIRES=${{ secrets.JWT_ACCESS_SECRET_EXPIRES }} >> .env
