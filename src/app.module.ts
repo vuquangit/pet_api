@@ -5,7 +5,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 
 import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
-import { mailerConfig, postgresqlConfig, typeOrm } from '@/configs';
+import { mailerConfig, mongoConfig, typeOrmMongo } from '@/configs';
 
 import { AuthModule } from '@/modules/auth/auth.module';
 import { UsersModule } from '@/modules/users/users.module';
@@ -17,9 +17,9 @@ import { OauthModule } from '@/modules/oauth/oauth.module';
     ConfigModule.forRoot({
       envFilePath: ['.env'],
       isGlobal: true,
-      load: [typeOrm],
+      load: [typeOrmMongo],
     }),
-    TypeOrmModule.forRootAsync(postgresqlConfig),
+    TypeOrmModule.forRootAsync(mongoConfig),
     MailerModule.forRootAsync(mailerConfig),
 
     // modules

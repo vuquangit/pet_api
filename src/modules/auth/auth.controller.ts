@@ -44,8 +44,8 @@ export class AuthController {
 
   @UseGuards(AccessTokenGuard)
   @Get('profile')
-  async getProfile(@Request() req: any): Promise<User | null> {
-    const id = req.user.id;
+  async getProfile(@Request() req: { user: User }): Promise<User | null> {
+    const id = req.user._id.toString();
     return await this.userService.findById(id);
   }
 
@@ -53,7 +53,7 @@ export class AuthController {
   @Post('change-password')
   @HttpCode(200)
   async changePassword(
-    @Request() req: any,
+    @Request() req: { user: User },
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<UpdateResult> {
     const user = req.user;

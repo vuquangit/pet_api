@@ -1,6 +1,7 @@
+import { mongoConfig } from './mongo.config';
 import { configSwagger } from './swagger.config';
-import { postgresqlConfig } from './postgres.config';
-import typeOrm from './typeOrm.config';
 import { mailerConfig } from './mailer.config';
 
-export { configSwagger, postgresqlConfig, typeOrm, mailerConfig };
+import typeOrmMongo from './typeOrm.config';
+
+export { configSwagger, mailerConfig, typeOrmMongo, mongoConfig };

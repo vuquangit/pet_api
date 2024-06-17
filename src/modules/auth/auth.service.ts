@@ -54,7 +54,7 @@ export class AuthService {
       });
     }
 
-    const userFound = await this.usersService.findById(user.id);
+    const userFound = await this.usersService.findById(user._id.toString());
     if (!userFound) {
       throw new NotFoundException({
         code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
@@ -72,7 +72,7 @@ export class AuthService {
   }
 
   async refreshToken(user: User): Promise<any> {
-    const userFound = await this.usersService.findById(user.id);
+    const userFound = await this.usersService.findById(user._id.toString());
     if (!userFound) {
       throw new NotFoundException({
         code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
@@ -139,7 +139,7 @@ export class AuthService {
     // Save the token or a hash of it to validate later
     const hashedToken = await this.hashPassword(token);
     await this.usersService.updateResetToken(
-      user.id,
+      user._id.toString(),
       hashedToken,
       reset_token_expiry,
     );
@@ -187,7 +187,7 @@ export class AuthService {
 
       const passwordHash = await this.hashPassword(newPassword);
       const user: User = {
-        id: userFound.id,
+        id: userFound._id,
         password: passwordHash,
         reset_token: null,
         reset_token_expiry: null,
