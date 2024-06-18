@@ -1,14 +1,10 @@
 {
   "version": 2,
   "builds": [{ "src": "dist/main.js", "use": "@vercel/node" }],
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
+  "rewrites": [{ "source": "/(.*)", "destination": "/dist/main.js" }],
   "git": {
     "deploymentEnabled": {
       "my-branch-name": false
     }
-  },
-  "installCommand": "yarn install",
-  "devCommand": "sh api/start.sh",
-  "outputDirectory": "dist",
-  "buildCommand": "yarn build"
+  }
 }
