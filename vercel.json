@@ -9,5 +9,6 @@
   },
   "installCommand": "yarn install",
   "devCommand": "yarn start",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "buildCommand": "yarn build"
 }
