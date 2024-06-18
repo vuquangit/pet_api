@@ -84,16 +84,12 @@ jobs:
       - name: Install Vercel CLI
         run: yarn global add vercel@latest
 
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy Project Artifacts to Vercel
+      - name: Deploy Project to Vercel
         id: deploy
         run: |
-          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+          vercel --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ENV: development
 
       # Set message env for success or failure
       - if: success()
