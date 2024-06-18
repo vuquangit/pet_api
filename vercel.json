@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "framework": "other",
   "builds": [
     {
       "src": "dist/main.js",
@@ -11,5 +12,6 @@
     "deploymentEnabled": {
       "my-branch-name": false
     }
-  }
+  },
+  "devCommand": "yarn start"
 }
