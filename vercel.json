@@ -1,7 +1,7 @@
 {
   "version": 2,
   "builds": [{ "src": "dist/main.js", "use": "@vercel/node" }],
-  "rewrites": [{ "source": "/(.*)", "destination": "api/start.sh" }],
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
   "git": {
     "deploymentEnabled": {
       "my-branch-name": false
