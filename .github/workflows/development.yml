@@ -87,7 +87,7 @@ jobs:
       - name: Deploy Project to Vercel
         id: deploy
         run: |
-          vercel --token=${{ secrets.VERCEL_TOKEN }}
+          vercel --token=${{ secrets.VERCEL_TOKEN }} --local-config ./vercel.json
         env:
           VERCEL_ENV: development
 
