@@ -20,6 +20,9 @@ import { ChangePasswordDto } from '@/modules/auth/dtos/ChangePassword.dto';
 import { ForgotPasswordDto } from '@/modules/auth/dtos/ForgotPassword.dto';
 import { EXCEPTION_CODE } from '@/constants/exceptionCode';
 import { UpdateResult } from '@/common/interfaces/common.interface';
+import { RegisterDto } from './dtos/Register.dto';
+import { ERole } from '../users/enums/role.enum';
+import { CreateUserDto } from '../users/dtos/CreateUser.dto';
 
 @Injectable()
 export class AuthService {
@@ -205,6 +208,17 @@ export class AuthService {
         message: 'Invalid or expired token',
       });
     }
+  }
+
+  async register(register: RegisterDto) {
+    const newUser: CreateUserDto = {
+      ...register,
+      role: ERole.USER,
+      is_delete_avatar: false,
+      is_active: true,
+    } as CreateUserDto;
+    console.log('newUser', newUser);
+    return await this.usersService.create(newUser);
   }
 
   // METHODS
