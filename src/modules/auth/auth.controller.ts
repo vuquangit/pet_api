@@ -21,6 +21,7 @@ import { RefreshTokenGuard } from '@/modules/auth/guards/refreshToken-auth.guard
 import { User } from '@/modules/users/entity/user.entity';
 import { IUserToken } from './interfaces/auth.interface';
 import { UpdateResult } from '@/common/interfaces/common.interface';
+import { RegisterDto } from './dtos/Register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -82,5 +83,12 @@ export class AuthController {
   async refreshToken(@Request() req: { user: User }): Promise<IUserToken> {
     const user = req.user;
     return await this.authService.refreshToken(user);
+  }
+
+  @Post('register')
+  @HttpCode(200)
+  async register(@Body() registerDto: RegisterDto): Promise<any> {
+    console.log('registerDto', registerDto);
+    return await this.authService.register(registerDto);
   }
 }
