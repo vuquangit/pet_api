@@ -5,12 +5,16 @@ import {
   Query,
   UseGuards,
   Res,
+  Post,
+  Body,
 } from '@nestjs/common';
 
 import { EXCEPTION_CODE } from '@/constants/exceptionCode';
 import { OauthService } from './oauth.service';
 import { GoogleOauthGuard } from './guards/google-oauth.guard';
 import { Response } from 'express';
+import { IUserToken } from '../auth/interfaces/auth.interface';
+import { OauthLoginAppDto } from './dtos/OauthLogin.dto';
 
 @Controller('oauth')
 export class OauthController {
@@ -65,6 +69,13 @@ export class OauthController {
           break;
       }
     }
+  }
+
+  @Post('google/app')
+  async oauthGoogleApp(
+    @Body() oauthLoginAppDto: OauthLoginAppDto,
+  ): Promise<IUserToken> {
+    return await this.oauthService.oauthGoogleApp(oauthLoginAppDto);
   }
 
   // use guard ???

@@ -273,11 +273,14 @@ export class UsersService {
       });
     }
 
-    const user = await this.usersRepository.findOne({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...user } = await this.usersRepository.findOne({
       where: { _id: new ObjectId(id) },
     });
 
-    return user;
+    return user as User;
   }
 
   async findByRole(role: ERole): Promise<User[]> {
