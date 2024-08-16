@@ -1,9 +1,14 @@
-import { Column, Entity, ObjectId, ObjectIdColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ObjectId,
+  ObjectIdColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { IsDate } from 'class-validator';
 
 import { ERole } from '../enums/role.enum';
-// import { Shop } from '@/modules/shop/entity/shop.entity';
-// import { Notification } from '@/modules/notification/entity/noti.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -55,10 +60,14 @@ export class User {
   @IsDate()
   end_date: Date;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @Column({ type: 'timestamp', onUpdate: 'CURRENT_TIMESTAMP', nullable: true })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    onUpdate: 'CURRENT_TIMESTAMP',
+    nullable: true,
+  })
   updated_at: Date;
 
   @Column({ nullable: true, select: false })
@@ -66,20 +75,4 @@ export class User {
 
   @Column({ nullable: true, type: 'timestamp', select: false })
   reset_token_expiry: Date;
-
-  // @Column({ name: 'shop_id' })
-  // shop_id: string;
-
-  // @ManyToOne(() => Shop, (shop) => shop.users)
-  // @JoinColumn({
-  //   name: 'shop_id',
-  // })
-  // shop: Shop;
-
-  // @OneToMany(() => Notification, (noti) => noti.user)
-  // notifications: Notification[];
-
-  // constructor(user?: Partial<User>) {
-  //   Object.assign(this, user);
-  // }
 }

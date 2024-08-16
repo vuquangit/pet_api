@@ -11,6 +11,7 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { UsersModule } from '@/modules/users/users.module';
 import { MailingModule } from '@/modules/mailing/mailing.module';
 import { OauthModule } from '@/modules/oauth/oauth.module';
+import { DinosaurModule } from '@/modules/dinosaur/dinosaur.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { OauthModule } from '@/modules/oauth/oauth.module';
     OauthModule,
     UsersModule,
     MailingModule,
+    DinosaurModule,
   ],
   controllers: [AppController],
   providers: [AppService],
