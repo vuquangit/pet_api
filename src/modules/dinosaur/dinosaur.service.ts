@@ -93,7 +93,7 @@ export class DinosaurService {
   async create(createDto: CreateDinosaurDto): Promise<Dinosaur> {
     if (!ObjectId.isValid(createDto.userId)) {
       throw new BadRequestException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
+        code: EXCEPTION_CODE.DINOSAUR.ID_NOT_FOUND,
         message: `A user id "${createDto.userId}" not correct ObjectId format`,
       });
     }
@@ -101,7 +101,7 @@ export class DinosaurService {
     const user = await this.userService.findById(createDto.userId);
     if (!user) {
       throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
+        code: EXCEPTION_CODE.DINOSAUR.ID_NOT_FOUND,
         message: `A user id "${createDto.userId}" was not found`,
       });
     }
@@ -123,8 +123,8 @@ export class DinosaurService {
 
     if (!data) {
       throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `ID is empty`,
+        code: EXCEPTION_CODE.DINOSAUR.ID_NOT_FOUND,
+        message: `ID not found`,
       });
     }
 
