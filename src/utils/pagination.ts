@@ -23,3 +23,14 @@ export const getMeta = (
     total: totalCount,
   };
 };
+
+export const takeByTop = (page: number, limit: number, top: number) => {
+  if (page * limit > top) {
+    const took = (page - 1) * limit;
+    if (top - took > 0) return top - took;
+
+    return 0;
+  }
+
+  return limit;
+};

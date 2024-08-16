@@ -6,6 +6,7 @@ import { IUserToken } from '@/modules/auth/interfaces/auth.interface';
 import { UsersService } from '@/modules/users/users.service';
 import { AuthService } from '@/modules/auth/auth.service';
 import { User } from '@/modules/users/entity/user.entity';
+import { OauthLoginAppDto } from './dtos/OauthLogin.dto';
 
 @Injectable()
 export class OauthService {
@@ -81,6 +82,28 @@ export class OauthService {
     }
 
     const googleUser = await this.getGoogleUser({ id_token, access_token });
+    if (!googleUser?.verified_email) {
+      throw new NotFoundException({
+        code: EXCEPTION_CODE.USER.EMAIL_NOT_FOUND,
+        message: 'Email not found',
+      });
+    }
+
+    const email = googleUser.email;
+    const user = await this.userService.findUserByEmail(email);
+
+    if (!user) {
+      throw new NotFoundException({
+        code: EXCEPTION_CODE.USER.EMAIL_NOT_FOUND,
+        message: 'Email not found',
+      });
+    }
+
+    return await this.authService.generateTokens(user);
+  }
+
+  async oauthGoogleApp(tokens: OauthLoginAppDto): Promise<IUserToken> {
+    const googleUser = await this.getGoogleUser(tokens);
     if (!googleUser?.verified_email) {
       throw new NotFoundException({
         code: EXCEPTION_CODE.USER.EMAIL_NOT_FOUND,
