@@ -50,7 +50,10 @@ export class DinosaurService {
     options['where'] = {};
 
     // get top dinosaur
-    if (top && takeByTop(page, limit, top) > 0) {
+    if (top && (!page || !limit)) {
+      options['order'] = { score: 'DESC' };
+      options['take'] = top;
+    } else if (top && takeByTop(page, limit, top) > 0) {
       options['order'] = { score: 'DESC' };
       options['skip'] = (page - 1) * limit;
       options['take'] = takeByTop(page, limit, top);
@@ -72,12 +75,15 @@ export class DinosaurService {
     const [data, count] = await this.dinosaurRepository.findAndCount(options);
     const dataLength = data.length;
     const dataCount = top && top < count ? top : count;
-    const meta = getMeta(query, dataCount, dataLength);
+    let meta = {};
+    if (page && limit) {
+      meta = getMeta(query, dataCount, dataLength);
+    }
 
     const dateFull = await Promise.all(
       data.map(async (item) => {
         // get new user data if exist user
-        const user = await this.userService.findById(item.userId);
+        const user = await this.userService.findById(item.user_id);
         if (user) item.user = user;
 
         return item;
@@ -91,18 +97,18 @@ export class DinosaurService {
   }
 
   async create(createDto: CreateDinosaurDto): Promise<Dinosaur> {
-    if (!ObjectId.isValid(createDto.userId)) {
+    if (!ObjectId.isValid(createDto.user_id)) {
       throw new BadRequestException({
         code: EXCEPTION_CODE.DINOSAUR.ID_NOT_FOUND,
-        message: `A user id "${createDto.userId}" not correct ObjectId format`,
+        message: `A user id "${createDto.user_id}" not correct ObjectId format`,
       });
     }
 
-    const user = await this.userService.findById(createDto.userId);
+    const user = await this.userService.findById(createDto.user_id);
     if (!user) {
       throw new NotFoundException({
         code: EXCEPTION_CODE.DINOSAUR.ID_NOT_FOUND,
-        message: `A user id "${createDto.userId}" was not found`,
+        message: `A user id "${createDto.user_id}" was not found`,
       });
     }
 
@@ -128,7 +134,7 @@ export class DinosaurService {
       });
     }
 
-    const user = await this.userService.findById(data.userId);
+    const user = await this.userService.findById(data.user_id);
     data.user = user;
 
     return data;
