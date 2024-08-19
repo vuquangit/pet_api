@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateDinosaurDto {
   @ApiProperty()
   @IsNotEmpty()
-  userId: string;
+  user_id: string;
 
   @ApiProperty()
   @IsNotEmpty()

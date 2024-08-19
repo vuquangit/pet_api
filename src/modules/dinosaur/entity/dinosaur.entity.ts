@@ -14,7 +14,7 @@ export class Dinosaur {
   _id: ObjectId;
 
   @Column()
-  userId: string;
+  user_id: string;
 
   @Column()
   user?: User | null;
