@@ -286,7 +286,7 @@ export class UsersService {
   async findByRole(role: ERole): Promise<User[]> {
     if (!role) {
       throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
+        code: EXCEPTION_CODE.USER.ROLE_INVALID,
         message: `Role is empty`,
       });
     }
