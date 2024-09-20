@@ -4,7 +4,7 @@ import {
   CreateFriendParams,
   FriendRequestParams,
 } from '@/modules/friend-requests/interfaces/friendRequest.interface';
-import { FriendRequest } from '@/modules/friend-requests/entity/friendRequest.entity';
+import { FriendRequest } from '@/modules/friend-requests/entities/friendRequest.entity';
 
 export interface IFriendRequestService {
   getFriendRequests(userId: string): Promise<FriendRequest[]>;

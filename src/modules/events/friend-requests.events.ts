@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 // import { MessagingGateway } from '../gateway/gateway';
 import { ServerEvents, WebsocketEvents } from '@/constants/constants';
-import { FriendRequest } from '../friend-requests/entity/friendRequest.entity';
+import { FriendRequest } from '../friend-requests/entities/friendRequest.entity';
 import { AcceptFriendRequestResponse } from '@/modules/friend-requests/interfaces/friendRequest.interface';
 
 @Injectable()

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Friend } from './entity/friend.entity';
+import { Friend } from './entities/friend.entity';
 import { DeleteFriendRequestParams } from './interfaces/friend.interface';
 import { DeleteFriendException } from './exceptions/DeleteFriend';
 import { FriendNotFoundException } from './exceptions/FriendNotFound';

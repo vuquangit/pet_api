@@ -25,6 +25,7 @@ import { EXCEPTION_CODE } from '@/constants/exceptionCode';
 import { ERole } from './enums/role.enum';
 import { getMeta } from '@/utils/pagination';
 import { UpdateResult } from '@/common/interfaces/common.interface';
+import { UserNotFoundException } from './exceptions/UserNotFound';
 
 @Injectable()
 export class UsersService {
@@ -123,10 +124,7 @@ export class UsersService {
     });
 
     if (!userFound) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `A user id '"${id}"' was not found`,
-      });
+      throw new UserNotFoundException(id);
     }
 
     const isExist = await this.mailExists(updateUserDto.email, userFound.email);
@@ -156,10 +154,7 @@ export class UsersService {
     );
 
     if (!updateResult.affected) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `A user id '"${id}"' was not found`,
-      });
+      throw new UserNotFoundException(id);
     }
 
     return { success: true };
@@ -197,10 +192,7 @@ export class UsersService {
     const deleteResult = await this.usersRepository.delete(id);
 
     if (!deleteResult.affected) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `A user id '"${id}"' was not found`,
-      });
+      throw new UserNotFoundException(id);
     }
 
     return { success: true };
@@ -213,10 +205,7 @@ export class UsersService {
 
     const userFound = await this.findById(userId);
     if (!userFound) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: 'ID not found',
-      });
+      throw new UserNotFoundException();
     }
     await this.mailService.sendNotiChangedPassword(userFound.email);
 
@@ -236,6 +225,36 @@ export class UsersService {
     } else {
       throw new Error('User not found');
     }
+  }
+
+  searchUsers(query: string) {
+    // const statement = '(user.username LIKE :query)';
+    // return this.usersRepository
+    //   .createQueryBuilder('user')
+    //   .where(statement, { query: `%${query}%` })
+    //   .limit(10)
+    //   .select([
+    //     'user.username',
+    //     'user.firstName',
+    //     'user.lastName',
+    //     'user.email',
+    //     'user.id',
+    //     'user.profile',
+    //   ])
+    //   .getMany();
+
+    console.log('searchUsers: ', query);
+
+    const userFound = this.usersRepository.find({
+      where: {
+        // name: /query/,
+        _id: new ObjectId(query),
+      },
+    });
+
+    if (!userFound) throw new UserNotFoundException();
+
+    return userFound;
   }
 
   // methods
@@ -267,10 +286,7 @@ export class UsersService {
 
   async findById(id: string): Promise<User | null> {
     if (!id) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `ID is empty`,
-      });
+      throw new UserNotFoundException();
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

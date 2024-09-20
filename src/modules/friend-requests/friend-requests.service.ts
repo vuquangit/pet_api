@@ -6,9 +6,9 @@ import { ObjectId } from 'mongodb';
 import { Services } from '@/constants/constants';
 import { FriendAlreadyExists } from '@/modules/friends/exceptions/FriendAlreadyExists';
 import { IFriendsService } from '@/modules/friends/friends';
-import { Friend } from '@/modules/friends/entity/friend.entity';
+import { Friend } from '@/modules/friends/entities/friend.entity';
 import { UserNotFoundException } from '@/modules/users/exceptions/UserNotFound';
-import { FriendRequest } from '@/modules/friend-requests/entity/friendRequest.entity';
+import { FriendRequest } from '@/modules/friend-requests/entities/friendRequest.entity';
 
 import {
   CreateFriendParams,

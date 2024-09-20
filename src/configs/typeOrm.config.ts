@@ -5,8 +5,11 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 import { User } from '@/modules/users/entity/user.entity';
 import { Dinosaur } from '@/modules/dinosaur/entity/dinosaur.entity';
-import { Friend } from '@/modules/friends/entity/friend.entity';
-import { FriendRequest } from '@/modules/friend-requests/entity/friendRequest.entity';
+import { Friend } from '@/modules/friends/entities/friend.entity';
+import { FriendRequest } from '@/modules/friend-requests/entities/friendRequest.entity';
+import { Session } from '@/modules/gateway/entities/session.entity';
+import { Conversation } from '@/modules/conversations/entities/conversation.entity';
+import { Message } from '@/modules/messages/entities/message.entity';
 
 dotenvConfig({ path: '.env' });
 
@@ -22,7 +25,15 @@ const config: TypeOrmModuleOptions = {
   // sslCRL: process.env.MONGO_DB_SSL_CRL,
 
   // Migration
-  entities: [User, Dinosaur, Friend, FriendRequest],
+  entities: [
+    User,
+    Dinosaur,
+    Friend,
+    FriendRequest,
+    Session,
+    Conversation,
+    Message,
+  ],
 
   // Only enable this option if your application is in development,
   // otherwise use TypeORM migrations to sync entity schemas:

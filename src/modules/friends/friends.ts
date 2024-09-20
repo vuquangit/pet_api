@@ -1,4 +1,4 @@
-import { Friend } from './entity/friend.entity';
+import { Friend } from './entities/friend.entity';
 import { DeleteFriendRequestParams } from './interfaces/friend.interface';
 
 export interface IFriendsService {

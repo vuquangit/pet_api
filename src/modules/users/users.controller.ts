@@ -12,6 +12,8 @@ import {
   ParseIntPipe,
   UploadedFile,
   ParseBoolPipe,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -92,5 +94,13 @@ export class UsersController {
   @Delete('user/:id')
   async remove(@Param('id') id: string): Promise<UpdateResult> {
     return await this.userService.remove(id);
+  }
+
+  @Get('users/search')
+  searchUsers(@Query('query') query: string) {
+    console.log(query);
+    if (!query)
+      throw new HttpException('Provide a valid query', HttpStatus.BAD_REQUEST);
+    return this.userService.searchUsers(query);
   }
 }

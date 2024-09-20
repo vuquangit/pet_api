@@ -10,7 +10,6 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  // @IsNumber()
   role: ERole;
 
   @ApiProperty({

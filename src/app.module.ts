@@ -18,7 +18,11 @@ import { OauthModule } from '@/modules/oauth/oauth.module';
 import { DinosaurModule } from '@/modules/dinosaur/dinosaur.module';
 import { FriendsModule } from '@/modules/friends/friends.module';
 import { EventsModule } from '@/modules/events/events.module';
-import { FriendRequestsModule } from './modules/friend-requests/friend-requests.module';
+import { FriendRequestsModule } from '@/modules/friend-requests/friend-requests.module';
+import { ConversationsModule } from '@/modules/conversations/conversations.module';
+import { MessagesModule } from '@/modules/messages/messages.module';
+import { GroupModule } from '@/modules/groups/group.module';
+import { ExistsModule } from '@/modules/exists/exists.module';
 
 @Module({
   imports: [
@@ -48,6 +52,10 @@ import { FriendRequestsModule } from './modules/friend-requests/friend-requests.
     EventsModule,
     FriendsModule,
     FriendRequestsModule,
+    ConversationsModule,
+    MessagesModule,
+    GroupModule,
+    ExistsModule,
   ],
   controllers: [AppController],
   providers: [

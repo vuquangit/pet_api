@@ -23,6 +23,7 @@ import { UpdateResult } from '@/common/interfaces/common.interface';
 import { RegisterDto } from './dtos/Register.dto';
 import { ERole } from '../users/enums/role.enum';
 import { CreateUserDto } from '../users/dtos/CreateUser.dto';
+import { UserNotFoundException } from '../users/exceptions/UserNotFound';
 
 @Injectable()
 export class AuthService {
@@ -59,10 +60,7 @@ export class AuthService {
 
     const userFound = await this.usersService.findById(user._id.toString());
     if (!userFound) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: 'ID not found',
-      });
+      throw new UserNotFoundException();
     }
     return await this.generateTokens(userFound);
   }
@@ -77,10 +75,7 @@ export class AuthService {
   async refreshToken(user: User): Promise<any> {
     const userFound = await this.usersService.findById(user._id.toString());
     if (!userFound) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: 'ID not found',
-      });
+      throw new UserNotFoundException();
     }
     return await this.generateTokens(userFound);
   }
@@ -91,10 +86,7 @@ export class AuthService {
   ): Promise<UpdateResult> {
     const userFound = await this.usersService.findUserByEmail(user.email);
     if (!userFound) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: 'ID not found',
-      });
+      throw new UserNotFoundException();
     }
 
     const passwordsMatches = await this.validatePassword(

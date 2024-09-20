@@ -1,6 +1,6 @@
 import { User } from '@/modules/users/entity/user.entity';
-import { Friend } from '@/modules/friends/entity/friend.entity';
-import { FriendRequest } from '@/modules/friend-requests/entity/friendRequest.entity';
+import { Friend } from '@/modules/friends/entities/friend.entity';
+import { FriendRequest } from '@/modules/friend-requests/entities/friendRequest.entity';
 
 export type FriendRequestParams = {
   id: string;
