@@ -8,6 +8,7 @@ import { configSwagger } from '@/configs';
 import { HttpResponseInterceptor } from '@/common/interceptors';
 import { ExceptionInterceptor } from '@/common/interceptors/exception.interceptor';
 import { HttpExceptionFilter } from '@/common/exception-filter/http-exception.filter';
+import { WebsocketAdapter } from '@/modules/gateway/gateway.adapter';
 
 declare const module: any;
 
@@ -29,7 +30,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ExceptionInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
-  // app.useWebSocketAdapter(new IoAdapter(app));
+  app.useWebSocketAdapter(new WebsocketAdapter(app)); // websocket
 
   configSwagger(app);
   await app.listen(port);

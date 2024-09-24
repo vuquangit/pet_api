@@ -1,4 +1,5 @@
-import { GroupMessageAttachment, MessageAttachment } from '@/utils/typeorm';
+import { MessageAttachment } from '@/modules/message-attachments/entities/MessageAttachment';
+import { GroupMessageAttachment } from '@/modules/groups/entities/GroupMessageAttachment';
 import {
   UploadGroupMessageAttachmentParams,
   UploadImageParams,

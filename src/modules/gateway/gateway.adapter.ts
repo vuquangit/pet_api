@@ -1,54 +1,58 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { getRepository } from 'typeorm';
-import * as cookieParser from 'cookie-parser';
-import * as cookie from 'cookie';
-import { plainToInstance } from 'class-transformer';
+import {
+  INestApplicationContext,
+  UseFilters,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 
 import { AuthenticatedSocket } from '@/utils/interfaces';
-import { Session } from '@/modules/gateway/entities/session.entity';
-import { User } from '@/modules/users/entity/user.entity';
+import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
+import { CustomSocketExceptionFilter } from './exceptions/ws-exception.filter';
+import { UsersService } from '@/modules/users/users.service';
 
+@UseFilters(CustomSocketExceptionFilter)
+@UseGuards(AccessTokenGuard)
+@UsePipes(new ValidationPipe())
 export class WebsocketAdapter extends IoAdapter {
+  private readonly jwtService: JwtService;
+  private readonly usersService: UsersService;
+  constructor(private app: INestApplicationContext) {
+    super(app);
+    this.jwtService = this.app.get(JwtService);
+    this.usersService = this.app.get(UsersService);
+  }
+
   createIOServer(port: number, options?: any) {
-    const sessionRepository = getRepository(Session);
     const server = super.createIOServer(port, options);
 
     server.use(async (socket: AuthenticatedSocket, next: any) => {
       console.log('Inside Websocket Adapter');
-      const { cookie: clientCookie } = socket.handshake.headers;
-      if (!clientCookie) {
-        console.log('Client has no cookies');
-        return next(new Error('Not Authenticated. No cookies were sent'));
+
+      const authorization = socket.handshake?.headers?.authorization || '';
+      const token = authorization?.replace('Bearer ', '').replace('Bearer', '');
+
+      if (!token || token === 'undefined') {
+        console.log('Client has no token');
+        return next(new Error('Not Authenticated. No token were sent'));
       }
 
-      const { CHAT_APP_SESSION_ID } = cookie.parse(clientCookie);
-      if (!CHAT_APP_SESSION_ID) {
-        console.log('CHAT_APP_SESSION_ID DOES NOT EXIST');
-        return next(new Error('Not Authenticated'));
-      }
-      const signedCookie = cookieParser.signedCookie(
-        CHAT_APP_SESSION_ID,
-        process.env.API_COOKIE_SECRET || '',
-      );
-
-      if (!signedCookie) return next(new Error('Error signing cookie'));
-
-      const sessionDB = await sessionRepository.findOne({
-        where: {
-          id: signedCookie,
-        },
+      const decoded = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_ACCESS_SECRET,
       });
-      if (!sessionDB) return next(new Error('No session found'));
 
-      const userFromJson = JSON.parse(sessionDB.json);
-      if (!userFromJson.passport || !userFromJson.passport.user)
-        return next(new Error('Passport or User object does not exist.'));
+      const emailUser = decoded.user.email;
+      if (!emailUser) {
+        return next(new Error('WS: Email not found.'));
+      }
+      const userFound = await this.usersService.findUserByEmail(emailUser);
+      if (!userFound) {
+        return next(new Error('User object does not exist.'));
+      }
+      socket.user = userFound;
 
-      const userDB = plainToInstance(
-        User,
-        JSON.parse(sessionDB.json).passport.user,
-      );
-      socket.user = userDB;
       next();
     });
     return server;

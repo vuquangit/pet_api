@@ -1,17 +1,13 @@
-import {
-  // Conversation,
-  Group,
-  GroupMessage,
-  GroupMessageAttachment,
-  // Message,
-  MessageAttachment,
-} from './typeorm';
 import { Request } from 'express';
 
 import { User } from '@/modules/users/entity/user.entity';
 import { Friend } from '@/modules/friends/entities/friend.entity';
 import { Message } from '@/modules/messages/entities/message.entity';
 import { Conversation } from '@/modules/conversations/entities/conversation.entity';
+import { GroupMessage } from '@/modules/groups/entities/GroupMessage';
+import { Group } from '@/modules/groups/entities/Group';
+import { GroupMessageAttachment } from '@/modules/groups/entities/GroupMessageAttachment';
+import { MessageAttachment } from '@/modules/message-attachments/entities/MessageAttachment';
 
 export type CreateUserDetails = {
   username: string;

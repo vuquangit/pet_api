@@ -9,10 +9,10 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Group } from '../../../modules/groups/entities/Group';
-import { Message } from './Message';
 import { Peer } from './Peer';
 import { Profile } from './Profile';
 import { UserPresence } from './UserPresence';
+import { Message } from '@/modules/messages/entities/message.entity';
 
 @Entity({ name: 'users' })
 export class User {

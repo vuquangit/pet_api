@@ -1,11 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 import { IImageStorageService } from '../image-storage/image-storage';
 import { Services } from '@/constants/constants';
-import { GroupMessageAttachment, MessageAttachment } from '@/utils/typeorm';
 import { Attachment } from '@/utils/types';
 import { IMessageAttachmentsService } from './message-attachments';
+import { MessageAttachment } from './entities/MessageAttachment';
+import { GroupMessageAttachment } from '@/modules/groups/entities/GroupMessageAttachment';
 
 @Injectable()
 export class MessageAttachmentsService implements IMessageAttachmentsService {

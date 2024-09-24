@@ -6,7 +6,8 @@ import { MessageAttachmentsModule } from '../message-attachments/message-attachm
 import { UsersModule } from '../users/users.module';
 import { Services } from '@/constants/constants';
 // import { isAuthorized } from '@/utils/helpers';
-import { Group, GroupMessage } from '@/utils/typeorm';
+import { GroupMessage } from './entities/GroupMessage';
+import { Group } from './entities/Group';
 import { GroupMessageController } from './controllers/group-messages.controller';
 import { GroupRecipientsController } from './controllers/group-recipients.controller';
 import { GroupController } from './controllers/group.controller';

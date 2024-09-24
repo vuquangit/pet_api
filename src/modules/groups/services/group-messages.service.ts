@@ -5,7 +5,6 @@ import { ObjectId, Repository } from 'typeorm';
 
 import { IGroupService } from '../interfaces/group';
 import { Services } from '@/constants/constants';
-import { Group, GroupMessage } from '@/utils/typeorm';
 import {
   CreateGroupMessageParams,
   DeleteGroupMessageParams,
@@ -13,6 +12,8 @@ import {
 } from '@/utils/types';
 import { IGroupMessageService } from '../interfaces/group-messages';
 import { UsersService } from '@/modules/users/users.service';
+import { GroupMessage } from '../entities/GroupMessage';
+import { Group } from '../entities/Group';
 // import { IMessageAttachmentsService } from '../../message-attachments/message-attachments';
 
 @Injectable()

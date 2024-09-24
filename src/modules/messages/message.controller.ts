@@ -51,7 +51,6 @@ export class MessageController {
     @Param('id') id: string,
     @Body() body: CreateMessageDto,
   ) {
-    console.log(body);
     const user = req.user;
     // if (!attachments && !content) throw new EmptyMessageException();
     const params = {
@@ -60,7 +59,6 @@ export class MessageController {
       content: body?.content || '',
       // attachments
     };
-    console.log('createMessage', params);
     const response = await this.messageService.createMessage(params);
     this.eventEmitter.emit('message.create', response);
     return;

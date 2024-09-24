@@ -68,6 +68,21 @@ export class MessageService implements IMessageService {
     conversation.lastMessageSent = savedMessage;
     const updated = await this.conversationService.save(conversation);
 
+    // relation: author, conversation
+    if (savedMessage) {
+      // author
+      const authorFound = await this.userService.findById(
+        savedMessage.author_id,
+      );
+      savedMessage.author = authorFound || null;
+
+      // conversation
+      const conversationFound = await this.conversationService.findById(
+        savedMessage.conversation_id,
+      );
+      if (conversationFound) savedMessage.conversation = conversationFound;
+    }
+
     return { message: savedMessage, conversation: updated };
   }
 

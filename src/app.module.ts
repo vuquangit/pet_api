@@ -23,6 +23,7 @@ import { ConversationsModule } from '@/modules/conversations/conversations.modul
 import { MessagesModule } from '@/modules/messages/messages.module';
 import { GroupModule } from '@/modules/groups/group.module';
 import { ExistsModule } from '@/modules/exists/exists.module';
+import { GatewayModule } from '@/modules/gateway/gateway.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { ExistsModule } from '@/modules/exists/exists.module';
     MessagesModule,
     GroupModule,
     ExistsModule,
+    GatewayModule,
   ],
   controllers: [AppController],
   providers: [

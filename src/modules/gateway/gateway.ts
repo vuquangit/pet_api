@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, UseGuards, UseFilters } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
   WebSocketGateway,
@@ -31,6 +31,8 @@ import { Conversation } from '@/modules/conversations/entities/conversation.enti
 import { Message } from '@/modules/messages/entities/message.entity';
 import { Group } from '@/modules/groups/entities/Group';
 import { GroupMessage } from '@/modules/groups/entities/GroupMessage';
+import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
+import { CustomSocketExceptionFilter } from './exceptions/ws-exception.filter';
 
 @WebSocketGateway({
   cors: {
@@ -40,6 +42,8 @@ import { GroupMessage } from '@/modules/groups/entities/GroupMessage';
   pingInterval: 10000,
   pingTimeout: 15000,
 })
+@UseFilters(new CustomSocketExceptionFilter())
+@UseGuards(AccessTokenGuard)
 export class MessagingGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
@@ -57,6 +61,7 @@ export class MessagingGateway
   @WebSocketServer()
   server: Server;
 
+  // INITS
   handleConnection(socket: AuthenticatedSocket) {
     console.log('Incoming Connection');
     if (!socket.user) return;
@@ -71,6 +76,7 @@ export class MessagingGateway
     this.sessions.removeUserSocket(socket.user._id.toString());
   }
 
+  // EVENTS
   @SubscribeMessage('getOnlineGroupUsers')
   async handleGetOnlineGroupUsers(
     @MessageBody() data: any,
@@ -337,7 +343,6 @@ export class MessagingGateway
 
   @SubscribeMessage('getOnlineFriends')
   async handleFriendListRetrieve(
-    @MessageBody() data: any,
     @ConnectedSocket() socket: AuthenticatedSocket,
   ) {
     const { user } = socket;
