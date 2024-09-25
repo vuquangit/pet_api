@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { EFriendStatus } from '@/modules/friend-requests/enums/friend.enum';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 
 @Entity({ name: 'friend_requests' })
 export class FriendRequest {

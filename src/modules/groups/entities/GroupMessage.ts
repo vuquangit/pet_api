@@ -10,7 +10,7 @@ import {
 import { Group } from './Group';
 // import { GroupMessageAttachment } from './GroupMessageAttachment';
 // import { MessageAttachment } from '../../../utils/typeorm/entities/MessageAttachment';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 
 @Entity({ name: 'group_messages' })
 export class GroupMessage {

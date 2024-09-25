@@ -11,7 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { IUserToken } from '@/modules/auth/interfaces/auth.interface';
 import { ConfigService } from '@nestjs/config';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 
 import { MailingService } from '@/modules/mailing/mailing.service';
 import { UsersService } from '@/modules/users/users.service';

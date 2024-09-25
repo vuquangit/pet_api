@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { IsDate } from 'class-validator';
 
-import { ERole } from '../enums/role.enum';
+import { ERole } from '@/modules/users/enums/role.enum';
 
 @Entity({ name: 'users' })
 export class User {

@@ -21,7 +21,7 @@ import { CreateUserDto } from '@/modules/users/dtos/CreateUser.dto';
 
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 import { UsersService } from '@/modules/users/users.service';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { PageDto } from '@/common/dtos/page.dto';
 import { UpdateResult } from '@/common/interfaces/common.interface';
 

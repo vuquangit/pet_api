@@ -16,7 +16,7 @@ import { Throttle } from '@nestjs/throttler';
 import { Routes, ServerEvents, Services } from '@/constants/constants';
 import { CreateFriendDto } from './dtos/CreateFriend.dto';
 import { IFriendRequestService } from './friend-requests';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 
 @Controller(Routes.FRIEND_REQUESTS)

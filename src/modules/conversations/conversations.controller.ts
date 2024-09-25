@@ -15,7 +15,7 @@ import { CreateConversationDto } from './dtos/CreateConversation.dto';
 import { Routes, Services } from '@/constants/constants';
 import { AuthUser } from '@/utils/decorators';
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 
 @SkipThrottle()
 @Controller(Routes.CONVERSATIONS)

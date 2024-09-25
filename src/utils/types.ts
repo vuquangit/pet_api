@@ -1,6 +1,6 @@
 import { Request } from 'express';
 
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Friend } from '@/modules/friends/entities/friend.entity';
 import { Message } from '@/modules/messages/entities/message.entity';
 import { Conversation } from '@/modules/conversations/entities/conversation.entity';

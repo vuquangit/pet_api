@@ -20,7 +20,7 @@ import { GroupOwnerTransferException } from '../exceptions/GroupOwnerTransfer';
 import { IGroupService } from '../interfaces/group';
 import { Group } from '../entities/Group';
 import { UsersService } from '@/modules/users/users.service';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { ObjectId } from 'mongodb';
 import { GroupMessage } from '../entities/GroupMessage';
 

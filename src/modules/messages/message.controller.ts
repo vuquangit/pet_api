@@ -23,7 +23,7 @@ import { SkipThrottle, Throttle } from '@nestjs/throttler';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 // import { EmptyMessageException } from './exceptions/EmptyMessage';
 // import { Attachment } from '@/utils/types';
-import { User } from '../users/entity/user.entity';
+import { User } from '../users/entities/user.entity';
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 
 @Controller(Routes.MESSAGES)

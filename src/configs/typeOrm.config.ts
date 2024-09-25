@@ -3,8 +3,8 @@ import { registerAs } from '@nestjs/config';
 import { config as dotenvConfig } from 'dotenv';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
-import { User } from '@/modules/users/entity/user.entity';
-import { Dinosaur } from '@/modules/dinosaur/entity/dinosaur.entity';
+import { User } from '@/modules/users/entities/user.entity';
+import { Dinosaur } from '@/modules/dinosaur/entities/dinosaur.entity';
 import { Friend } from '@/modules/friends/entities/friend.entity';
 import { FriendRequest } from '@/modules/friend-requests/entities/friendRequest.entity';
 import { Session } from '@/modules/gateway/entities/session.entity';

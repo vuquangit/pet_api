@@ -56,7 +56,9 @@ export class WebsocketAdapter extends IoAdapter {
         }
         socket.user = userFound;
       } catch (error) {
-        return next(new Error('ERROR: ' + JSON.stringify(error)));
+        return next(
+          new Error('ERROR WebsocketAdapter: ' + JSON.stringify(error)),
+        );
       }
 
       next();

@@ -1,4 +1,4 @@
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Socket } from 'socket.io';
 
 export interface AuthenticatedSocket extends Socket {

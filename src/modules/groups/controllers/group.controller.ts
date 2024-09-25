@@ -21,7 +21,7 @@ import { CreateGroupDto } from '../dtos/CreateGroup.dto';
 import { TransferOwnerDto } from '../dtos/TransferOwner.dto';
 import { UpdateGroupDetailsDto } from '../dtos/UpdateGroupDetails.dto';
 import { IGroupService } from '../interfaces/group';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 
 @SkipThrottle()
 @Controller(Routes.GROUPS)

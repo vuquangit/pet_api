@@ -2,7 +2,7 @@ import { Factory, Seeder } from 'typeorm-seeding';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bcrypt = require('bcrypt');
 
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { ERole } from '@/modules/users/enums/role.enum';
 
 export class UserCreateSeed implements Seeder {

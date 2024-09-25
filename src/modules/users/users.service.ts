@@ -7,7 +7,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 import { ObjectId } from 'mongodb';
 
 // dtos
@@ -16,7 +16,7 @@ import { PageDto } from '@/common/dtos/page.dto';
 
 // services
 import { AuthService } from '@/modules/auth/auth.service';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { MailingService } from '@/modules/mailing/mailing.service';
 // import { UploadService } from '@/modules/upload/upload.service';
 
@@ -266,7 +266,19 @@ export class UsersService {
     // const role = user.role;
 
     const options: any = {
-      relations: {},
+      select: [
+        '_id',
+        'email',
+        'role',
+        'address',
+        'birthday',
+        'avatar_url',
+        'phone',
+        'is_active',
+        'note',
+        'reset_token',
+        'reset_token_expiry',
+      ], // TODO: get more if have
       order: { [sortBy]: order },
     };
     if (page && limit) {
@@ -312,16 +324,27 @@ export class UsersService {
     });
   }
 
-  async findUserByEmail(email: string): Promise<User | null> {
+  async findUserByEmail(
+    email: string,
+    isIncludePassword = false,
+  ): Promise<User | null> {
+    const userSelects = [
+      '_id',
+      'password',
+      'email',
+      'role',
+      'address',
+      'birthday',
+      'avatar_url',
+      'phone',
+      'is_active',
+      'note',
+      'reset_token',
+      'reset_token_expiry',
+    ].filter((s) => isIncludePassword || s !== 'password');
+
     return await this.usersRepository.findOne({
-      select: [
-        '_id',
-        'password',
-        'email',
-        'role',
-        'reset_token',
-        'reset_token_expiry',
-      ],
+      select: userSelects as FindOptionsSelect<User>,
       where: { email: email },
     });
   }

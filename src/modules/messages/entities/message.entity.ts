@@ -6,7 +6,7 @@ import {
   ObjectIdColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Conversation } from '@/modules/conversations/entities/conversation.entity';
 // import { MessageAttachment } from '@/utils/typeorm';
 

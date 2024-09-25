@@ -1,4 +1,4 @@
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Friend } from '@/modules/friends/entities/friend.entity';
 import { FriendRequest } from '@/modules/friend-requests/entities/friendRequest.entity';
 

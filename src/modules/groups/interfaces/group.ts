@@ -7,7 +7,7 @@ import {
   UpdateGroupDetailsParams,
 } from '@/utils/types';
 import { Group } from '../entities/Group';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 
 export interface IGroupService {
   createGroup(params: CreateGroupParams): any;

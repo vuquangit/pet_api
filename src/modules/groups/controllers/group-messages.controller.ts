@@ -21,7 +21,7 @@ import { Routes, Services } from '@/constants/constants';
 import { AuthUser } from '@/utils/decorators';
 import { Attachment } from '@/utils/types';
 import { IGroupMessageService } from '../interfaces/group-messages';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 
 @Controller(Routes.GROUP_MESSAGES)
 export class GroupMessageController {

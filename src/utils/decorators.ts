@@ -1,4 +1,4 @@
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 // import { AuthenticatedRequest } from './types';
 

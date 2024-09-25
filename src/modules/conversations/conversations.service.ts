@@ -21,7 +21,7 @@ import { ConversationNotFoundException } from './exceptions/ConversationNotFound
 import { CreateConversationException } from './exceptions/CreateConversation';
 import { Conversation } from './entities/conversation.entity';
 import { ObjectId } from 'mongodb';
-import { User } from '../users/entity/user.entity';
+import { User } from '../users/entities/user.entity';
 // import { getMeta } from '@/utils/pagination';
 // import { PageDto } from '@/common/dtos/page.dto';
 

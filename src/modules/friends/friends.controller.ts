@@ -11,7 +11,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SkipThrottle } from '@nestjs/throttler';
 
 import { Routes, ServerEvents, Services } from '../../constants/constants';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 import { IFriendsService } from './friends';
 

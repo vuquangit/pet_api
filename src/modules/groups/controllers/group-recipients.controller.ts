@@ -15,7 +15,7 @@ import { AuthUser } from '@/utils/decorators';
 // import { User } from '../../utils/typeorm';
 import { AddGroupRecipientDto } from '../dtos/AddGroupRecipient.dto';
 import { IGroupRecipientService } from '../interfaces/group-recipient';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 
 @SkipThrottle()
 @Controller(Routes.GROUP_RECIPIENTS)
