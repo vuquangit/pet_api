@@ -31,27 +31,33 @@ export class WebsocketAdapter extends IoAdapter {
     server.use(async (socket: AuthenticatedSocket, next: any) => {
       console.log('Inside Websocket Adapter');
 
-      const authorization = socket.handshake?.headers?.authorization || '';
-      const token = authorization?.replace('Bearer ', '').replace('Bearer', '');
+      try {
+        const authorization = socket.handshake?.headers?.authorization || '';
+        const token = authorization
+          ?.replace('Bearer ', '')
+          .replace('Bearer', '');
 
-      if (!token || token === 'undefined') {
-        console.log('Client has no token');
-        return next(new Error('Not Authenticated. No token were sent'));
-      }
+        if (!token || token === 'undefined') {
+          console.log('Client has no token');
+          return next(new Error('Not Authenticated. No token were sent'));
+        }
 
-      const decoded = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_ACCESS_SECRET,
-      });
+        const decoded = await this.jwtService.verifyAsync(token, {
+          secret: process.env.JWT_ACCESS_SECRET,
+        });
 
-      const emailUser = decoded.user.email;
-      if (!emailUser) {
-        return next(new Error('WS: Email not found.'));
+        const emailUser = decoded.user.email;
+        if (!emailUser) {
+          return next(new Error('WS: Email not found.'));
+        }
+        const userFound = await this.usersService.findUserByEmail(emailUser);
+        if (!userFound) {
+          return next(new Error('User object does not exist.'));
+        }
+        socket.user = userFound;
+      } catch (error) {
+        return next(new Error('ERROR: ' + JSON.stringify(error)));
       }
-      const userFound = await this.usersService.findUserByEmail(emailUser);
-      if (!userFound) {
-        return next(new Error('User object does not exist.'));
-      }
-      socket.user = userFound;
 
       next();
     });
