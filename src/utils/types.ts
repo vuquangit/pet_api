@@ -127,9 +127,9 @@ export type AddGroupRecipientParams = {
 };
 
 export type RemoveGroupRecipientParams = {
-  id: string;
+  groupId: string;
   removeUserId: string;
-  issuerId: string;
+  userId: string;
 };
 
 export type AddGroupUserResponse = {
@@ -150,7 +150,7 @@ export type AccessParams = {
 export type TransferOwnerParams = {
   userId: string;
   groupId: string;
-  newOwnerId: string;
+  new_owner_id: string;
 };
 
 export type LeaveGroupParams = {

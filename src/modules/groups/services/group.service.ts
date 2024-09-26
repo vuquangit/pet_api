@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 
 import { IImageStorageService } from '../../image-storage/image-storage';
 import { UserNotFoundException } from '../../users/exceptions/UserNotFound';
-// import { IUserService } from '../../users/interfaces/user';
 import { Services } from '@/constants/constants';
 // import { generateUUIDV4 } from '@/utils/helpers';
 import {
@@ -41,7 +40,9 @@ export class GroupService implements IGroupService {
     const usersPromise = params.users.map((userId) =>
       this.userService.findById(userId),
     );
-    const users = (await Promise.all(usersPromise)).filter((user) => user);
+    const users: User[] = (await Promise.all(usersPromise)).filter(
+      (user) => user,
+    ) as User[];
     users.push(creator);
 
     const userIds: string[] = users.map((user: User) => user._id.toString());
@@ -54,26 +55,49 @@ export class GroupService implements IGroupService {
       creator_id: creator._id.toString(),
       title,
     });
-    return this.groupRepository.save(group);
+    const groupSaved = await this.groupRepository.save(group);
+
+    return {
+      ...groupSaved,
+      users,
+      creator,
+      owner: creator,
+    };
   }
 
-  getGroups(params: FetchGroupsParams): Promise<Group[]> {
-    return this.groupRepository
-      .createQueryBuilder('group')
-      .leftJoinAndSelect('group.users', 'user')
-      .where('user.id IN (:users)', { users: [params.userId] })
-      .leftJoinAndSelect('group.users', 'users')
-      .leftJoinAndSelect('group.creator', 'creator')
-      .leftJoinAndSelect('group.owner', 'owner')
-      .leftJoinAndSelect('group.lastMessageSent', 'lastMessageSent')
-      .leftJoinAndSelect('users.profile', 'usersProfile')
-      .leftJoinAndSelect('users.presence', 'usersPresence')
-      .orderBy('group.lastMessageSentAt', 'DESC')
-      .getMany();
+  async getGroups(params: FetchGroupsParams): Promise<Group[]> {
+    // return this.groupRepository
+    //   .createQueryBuilder('group')
+    //   .leftJoinAndSelect('group.users', 'user')
+    //   .where('user.id IN (:users)', { users: [params.userId] })
+    //   .leftJoinAndSelect('group.users', 'users')
+    //   .leftJoinAndSelect('group.creator', 'creator')
+    //   .leftJoinAndSelect('group.owner', 'owner')
+    //   .leftJoinAndSelect('group.lastMessageSent', 'lastMessageSent')
+    //   .leftJoinAndSelect('users.profile', 'usersProfile')
+    //   .leftJoinAndSelect('users.presence', 'usersPresence')
+    //   .orderBy('group.lastMessageSentAt', 'DESC')
+    //   .getMany();
+
+    // FIXME: get relation
+    const groupFounds = await this.groupRepository.find({
+      where: { user_ids: params.userId },
+    });
+
+    let groups: Group[] = [];
+    if (groupFounds.length > 0) {
+      groups = await Promise.all(
+        groupFounds.map(async (group) => await this.getGroupRelations(group)),
+      );
+    }
+
+    return groups;
   }
 
   async findGroupById(id: string): Promise<Group> {
-    const groupFounds = await this.groupRepository.findOne({
+    if (!id) throw new GroupNotFoundException();
+
+    const groupFound = await this.groupRepository.findOne({
       where: { _id: new ObjectId(id) },
       // relations: [
       //   'creator',
@@ -85,32 +109,42 @@ export class GroupService implements IGroupService {
       // ],
     });
 
-    if (!groupFounds) throw new GroupNotFoundException();
+    return await this.getGroupRelations(groupFound);
+  }
 
-    const creatorFound = await this.userService.findById(
-      groupFounds.creator_id,
-    );
-    creatorFound && (groupFounds.creator = creatorFound);
+  async getGroupRelations(_group: Group | null): Promise<Group> {
+    if (!_group) throw new GroupNotFoundException();
 
-    // TODO: get relation users
-    // const userReceiverFound = await this.userService.findById(
-    //   groupFounds.user_ids,
-    // );
-    // groupFounds.users = userReceiverFound;
+    // relation: creator
+    const creatorFound = await this.userService.findById(_group.creator_id);
+    creatorFound && (_group.creator = creatorFound);
 
-    if (groupFounds.lastMessageSent_id) {
-      const groupMessageFound = await this.groupMessageRepository.findOne({
-        where: {
-          _id: new ObjectId(groupFounds.lastMessageSent_id),
-        },
-      });
-      groupMessageFound && (groupFounds.lastMessageSent = groupMessageFound);
+    // relation: users
+    if (_group.user_ids) {
+      const users = await Promise.all(
+        _group.user_ids.map(
+          async (userId) => await this.userService.findById(userId),
+        ),
+      );
+
+      users && (_group.users = users as User[]);
     }
 
-    const ownerFound = await this.userService.findById(groupFounds.owner_id);
-    ownerFound && (groupFounds.owner = ownerFound);
+    // relation: lastMessageSent
+    if (_group.lastMessageSent_id) {
+      const groupMessageFound = await this.groupMessageRepository.findOne({
+        where: {
+          _id: new ObjectId(_group.lastMessageSent_id),
+        },
+      });
+      groupMessageFound && (_group.lastMessageSent = groupMessageFound);
+    }
 
-    return groupFounds;
+    // relation: owner
+    const ownerFound = await this.userService.findById(_group.owner_id);
+    ownerFound && (_group.owner = ownerFound);
+
+    return _group;
   }
 
   saveGroup(group: Group): Promise<Group> {
@@ -120,24 +154,24 @@ export class GroupService implements IGroupService {
   async hasAccess({ id, userId }: AccessParams): Promise<User | undefined> {
     const group = await this.findGroupById(id);
     if (!group) throw new GroupNotFoundException();
-    return group.users.find((user) => user._id.toString() === userId);
+    return group?.users?.find((user) => user._id.toString() === userId);
   }
 
   async transferGroupOwner({
     userId,
     groupId,
-    newOwnerId,
+    new_owner_id,
   }: TransferOwnerParams): Promise<Group> {
     const group = await this.findGroupById(groupId);
     if (!group) throw new GroupNotFoundException();
     if (group.owner_id !== userId)
       throw new GroupOwnerTransferException('Insufficient Permissions');
-    if (group.owner_id === newOwnerId)
+    if (group.owner_id === new_owner_id)
       throw new GroupOwnerTransferException(
         'Cannot Transfer Owner to yourself',
       );
 
-    const newOwner = await this.userService.findById(newOwnerId);
+    const newOwner = await this.userService.findById(new_owner_id);
     if (!newOwner) throw new UserNotFoundException();
     group.owner = newOwner;
     return this.groupRepository.save(group);

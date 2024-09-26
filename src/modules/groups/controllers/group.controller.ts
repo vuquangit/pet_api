@@ -8,23 +8,25 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SkipThrottle } from '@nestjs/throttler';
 
 import { Routes, Services } from '@/constants/constants';
-import { AuthUser } from '@/utils/decorators';
-// import { User } from '../../utils/typeorm';
 import { Attachment } from '@/utils/types';
 import { CreateGroupDto } from '../dtos/CreateGroup.dto';
 import { TransferOwnerDto } from '../dtos/TransferOwner.dto';
 import { UpdateGroupDetailsDto } from '../dtos/UpdateGroupDetails.dto';
 import { IGroupService } from '../interfaces/group';
 import { User } from '@/modules/users/entities/user.entity';
+import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 
 @SkipThrottle()
 @Controller(Routes.GROUPS)
+@UseGuards(AccessTokenGuard)
 export class GroupController {
   constructor(
     @Inject(Services.GROUPS) private readonly groupService: IGroupService,
@@ -32,7 +34,11 @@ export class GroupController {
   ) {}
 
   @Post()
-  async createGroup(@AuthUser() user: User, @Body() payload: CreateGroupDto) {
+  async createGroup(
+    @Request() req: { user: User },
+    @Body() payload: CreateGroupDto,
+  ) {
+    const user = req.user;
     const group = await this.groupService.createGroup({
       ...payload,
       creator: user,
@@ -42,23 +48,26 @@ export class GroupController {
   }
 
   @Get()
-  getGroups(@AuthUser() user: User) {
-    return this.groupService.getGroups({ userId: user._id.toString() });
+  getGroups(@Request() req: { user: User }) {
+    const user = req.user;
+    const userId = user._id.toString();
+    return this.groupService.getGroups({ userId });
   }
 
   @Get(':id')
-  getGroup(@AuthUser() user: User, @Param('id') id: string) {
+  getGroup(@Param('id') id: string) {
     return this.groupService.findGroupById(id);
   }
 
   @Patch(':id/owner')
   async updateGroupOwner(
-    @AuthUser() user: User,
+    @Request() req: { user: User },
     @Param('id') groupId: string,
-    @Body() { newOwnerId }: TransferOwnerDto,
+    @Body() { new_owner_id }: TransferOwnerDto,
   ) {
+    const user = req.user;
     const userId = user._id.toString();
-    const params = { userId, groupId, newOwnerId };
+    const params = { userId, groupId, new_owner_id };
     const group = await this.groupService.transferGroupOwner(params);
     this.eventEmitter.emit('group.owner.update', group);
     return group;
@@ -71,8 +80,6 @@ export class GroupController {
     @Param('id') id: string,
     @UploadedFile() avatar: Attachment,
   ) {
-    console.log(avatar);
-    console.log(title);
     return this.groupService.updateDetails({ id, avatar, title });
   }
 }

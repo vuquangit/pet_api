@@ -1,24 +1,25 @@
 import {
   Controller,
   Param,
-  // ParseIntPipe,
   Post,
   Body,
   Inject,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SkipThrottle } from '@nestjs/throttler';
 
 import { Routes, Services } from '@/constants/constants';
-import { AuthUser } from '@/utils/decorators';
-// import { User } from '../../utils/typeorm';
 import { AddGroupRecipientDto } from '../dtos/AddGroupRecipient.dto';
 import { IGroupRecipientService } from '../interfaces/group-recipient';
 import { User } from '@/modules/users/entities/user.entity';
+import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 
 @SkipThrottle()
 @Controller(Routes.GROUP_RECIPIENTS)
+@UseGuards(AccessTokenGuard)
 export class GroupRecipientsController {
   constructor(
     @Inject(Services.GROUP_RECIPIENTS)
@@ -26,12 +27,20 @@ export class GroupRecipientsController {
     private eventEmitter: EventEmitter2,
   ) {}
 
+  /**
+   *
+   * @param req Add new user to group
+   * @param id the id of the group
+   * @param add_user_id the id of the new user
+   * @returns response
+   */
   @Post()
   async addGroupRecipient(
-    @AuthUser() user: User,
+    @Request() req: { user: User },
     @Param('id') id: string,
     @Body() { add_user_id }: AddGroupRecipientDto,
   ) {
+    const user = req.user;
     const userId = user._id.toString();
     const params = { id, userId, add_user_id };
     const response = await this.groupRecipientService.addGroupRecipient(params);
@@ -46,7 +55,11 @@ export class GroupRecipientsController {
    * @returns the updated Group that the user had left
    */
   @Delete('leave')
-  async leaveGroup(@AuthUser() user: User, @Param('id') groupId: string) {
+  async leaveGroup(
+    @Request() req: { user: User },
+    @Param('id') groupId: string,
+  ) {
+    const user = req.user;
     const userId = user._id.toString();
     const group = await this.groupRecipientService.leaveGroup({
       id: groupId,
@@ -58,12 +71,13 @@ export class GroupRecipientsController {
 
   @Delete(':userId')
   async removeGroupRecipient(
-    @AuthUser() user: User,
-    @Param('id') id: string,
+    @Request() req: { user: User },
+    @Param('id') groupId: string,
     @Param('userId') removeUserId: string,
   ) {
+    const user = req.user;
     const userId = user._id.toString();
-    const params = { issuerId: userId, id, removeUserId };
+    const params = { userId: userId, groupId, removeUserId };
     const response =
       await this.groupRecipientService.removeGroupRecipient(params);
     this.eventEmitter.emit('group.user.remove', response);

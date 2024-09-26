@@ -17,28 +17,17 @@ export class Group {
   @Column({ nullable: true })
   title?: string;
 
-  // @ManyToMany(() => User, (user) => user.groups)
-  // @JoinTable()
-  // users: User[];
-
   @Column()
-  user_ids: string[]; // TODO: check type
+  user_ids: string[];
 
   @Column({ nullable: true })
   users: User[];
 
-  // @OneToOne(() => User, { createForeignKeyConstraints: false })
-  // @JoinColumn()
-  // creator: User;
   @Column()
   creator_id: string;
 
   @Column({ nullable: true })
   creator: User;
-
-  // @OneToOne(() => User, { createForeignKeyConstraints: false })
-  // @JoinColumn()
-  // owner: User;
 
   @Column()
   owner_id: string;
@@ -46,11 +35,6 @@ export class Group {
   @Column({ nullable: true })
   owner: User;
 
-  // @OneToMany(() => GroupMessage, (message) => message.group, {
-  //   cascade: ['insert', 'remove', 'update'],
-  // })
-  // @JoinColumn()
-  // messages: GroupMessage[];
   @Column()
   messages_ids: string[]; // TODO: check type
 
@@ -67,9 +51,6 @@ export class Group {
   })
   updated_at: Date;
 
-  // @OneToOne(() => GroupMessage)
-  // @JoinColumn({ name: 'last_message_sent' })
-  // lastMessageSent: GroupMessage;
   @Column({ nullable: true })
   lastMessageSent_id: string | null;
 

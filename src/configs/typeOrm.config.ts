@@ -10,6 +10,8 @@ import { FriendRequest } from '@/modules/friend-requests/entities/friendRequest.
 import { Session } from '@/modules/gateway/entities/session.entity';
 import { Conversation } from '@/modules/conversations/entities/conversation.entity';
 import { Message } from '@/modules/messages/entities/message.entity';
+import { Group } from '@/modules/groups/entities/Group';
+import { GroupMessage } from '@/modules/groups/entities/GroupMessage';
 
 dotenvConfig({ path: '.env' });
 
@@ -33,6 +35,8 @@ const config: TypeOrmModuleOptions = {
     Session,
     Conversation,
     Message,
+    Group,
+    GroupMessage,
   ],
 
   // Only enable this option if your application is in development,

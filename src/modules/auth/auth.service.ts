@@ -38,7 +38,10 @@ export class AuthService {
   ) {}
 
   async login(loginUserDto: LoginUserDto): Promise<IUserToken> {
-    const user = await this.usersService.findUserByEmail(loginUserDto.email);
+    const user = await this.usersService.findUserByEmail(
+      loginUserDto.email,
+      true,
+    );
     if (!user) {
       throw new NotFoundException({
         code: EXCEPTION_CODE.USER.EMAIL_NOT_FOUND,

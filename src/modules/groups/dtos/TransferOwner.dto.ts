@@ -4,6 +4,5 @@ import { IsNotEmpty } from 'class-validator';
 export class TransferOwnerDto {
   @ApiProperty()
   @IsNotEmpty()
-  // @IsNumber()
-  newOwnerId: string;
+  new_owner_id: string;
 }

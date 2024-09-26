@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-// import { instanceToPlain } from 'class-transformer';
-import { ObjectId, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { ObjectId } from 'mongodb';
 
 import { IGroupService } from '../interfaces/group';
 import { Services } from '@/constants/constants';
@@ -30,12 +30,9 @@ export class GroupMessageService implements IGroupMessageService {
     private readonly userService: UsersService,
   ) {}
 
-  async createGroupMessage({
-    groupId: id,
-    ...params
-  }: CreateGroupMessageParams) {
+  async createGroupMessage({ groupId, ...params }: CreateGroupMessageParams) {
     const { content, author } = params;
-    const group = await this.groupService.findGroupById(id);
+    const group = await this.groupService.findGroupById(groupId);
     if (!group)
       throw new HttpException('No Group Found', HttpStatus.BAD_REQUEST);
 
@@ -44,11 +41,10 @@ export class GroupMessageService implements IGroupMessageService {
     );
     if (!findUser)
       throw new HttpException('User not in group', HttpStatus.BAD_REQUEST);
+
     const groupMessage = this.groupMessageRepository.create({
       content,
-      // group,
       group_id: group._id.toString(),
-      // author: instanceToPlain(author),
       author_id: author._id.toString(),
       // attachments: params.attachments
       //   ? await this.messageAttachmentsService.createGroupAttachments(
@@ -92,15 +88,17 @@ export class GroupMessageService implements IGroupMessageService {
 
   async deleteGroupMessage(params: DeleteGroupMessageParams) {
     console.log(params);
-    const group = await this.groupRepository
-      .createQueryBuilder('group')
-      .where('group.id = :groupId', { groupId: params.groupId })
-      .leftJoinAndSelect('group.lastMessageSent', 'lastMessageSent')
-      .leftJoinAndSelect('group.messages', 'messages')
-      .orderBy('messages.createdAt', 'DESC')
-      .limit(5)
-      .getOne();
-
+    // const group = await this.groupRepository
+    //   .createQueryBuilder('group')
+    //   .where('group.id = :groupId', { groupId: params.groupId })
+    //   .leftJoinAndSelect('group.lastMessageSent', 'lastMessageSent')
+    //   .leftJoinAndSelect('group.messages', 'messages')
+    //   .orderBy('messages.createdAt', 'DESC')
+    //   .limit(5)
+    //   .getOne();
+    const group = await this.groupRepository.findOne({
+      where: { _id: new ObjectId(params.groupId) },
+    });
     if (!group)
       throw new HttpException('Group not found', HttpStatus.BAD_REQUEST);
     const message = await this.groupMessageRepository.findOne({
@@ -117,7 +115,7 @@ export class GroupMessageService implements IGroupMessageService {
     if (group.lastMessageSent_id !== message._id.toString())
       return this.groupMessageRepository.delete(message._id.toString());
 
-    const size = group.messages.length;
+    const size = group.messages_ids.length;
     const SECOND_MESSAGE_INDEX = 1;
     if (size <= 1) {
       console.log('Last Message Sent is deleted');
@@ -127,9 +125,9 @@ export class GroupMessageService implements IGroupMessageService {
       return this.groupMessageRepository.delete(message._id.toString());
     } else {
       console.log('There are more than 1 message');
-      const newLastMessage = group.messages[SECOND_MESSAGE_INDEX];
+      const newLastMessage = group.messages_ids[SECOND_MESSAGE_INDEX];
       await this.groupRepository.update(params.groupId, {
-        lastMessageSent: newLastMessage,
+        lastMessageSent_id: newLastMessage,
       });
       return this.groupMessageRepository.delete(message._id.toString());
     }
@@ -141,11 +139,26 @@ export class GroupMessageService implements IGroupMessageService {
         _id: new ObjectId(params.messageId),
         author_id: params.userId,
       },
-      relations: ['group', 'group.creator', 'group.users', 'author'],
     });
     if (!messageDB)
       throw new HttpException('Cannot Edit Message', HttpStatus.BAD_REQUEST);
+
     messageDB.content = params.content;
-    return this.groupMessageRepository.save(messageDB);
+    const savedMessage = await this.groupMessageRepository.save(messageDB);
+
+    // relations: ['group', 'group.creator', 'group.users', 'author'],
+    if (savedMessage) {
+      const groupFound = await this.groupService.findGroupById(
+        savedMessage.group_id,
+      );
+      groupFound && (savedMessage.group = groupFound);
+
+      const authorFound = await this.userService.findById(
+        savedMessage.author_id,
+      );
+      savedMessage.author = authorFound;
+    }
+
+    return savedMessage;
   }
 }
