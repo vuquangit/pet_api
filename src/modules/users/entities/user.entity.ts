@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { IsDate } from 'class-validator';
 
-import { ERole } from '../enums/role.enum';
+import { ERole } from '@/modules/users/enums/role.enum';
 
 @Entity({ name: 'users' })
 export class User {
@@ -51,6 +51,18 @@ export class User {
 
   @Column({ nullable: true })
   note: string;
+
+  @Column({ nullable: true })
+  peer_id: string;
+
+  // @Column({ nullable: true })
+  // peer: Peer;
+
+  // @Column({ nullable: true })
+  // presence_id: string;
+
+  // @Column({ nullable: true })
+  // presence: UserPresence;
 
   @Column({ type: 'date', nullable: true })
   @IsDate()

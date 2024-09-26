@@ -18,7 +18,7 @@ import { UsersService } from '@/modules/users/users.service';
 import { AuthService } from './auth.service';
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 import { RefreshTokenGuard } from '@/modules/auth/guards/refreshToken-auth.guard';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { IUserToken } from './interfaces/auth.interface';
 import { UpdateResult } from '@/common/interfaces/common.interface';
 import { RegisterDto } from './dtos/Register.dto';

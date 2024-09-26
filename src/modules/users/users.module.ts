@@ -4,7 +4,7 @@ import { HttpModule } from '@nestjs/axios';
 
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { User } from './entity/user.entity';
+import { User } from './entities/user.entity';
 
 import { AuthModule } from '@/modules/auth/auth.module';
 import { MailingModule } from '@/modules/mailing/mailing.module';

@@ -7,7 +7,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 import { ObjectId } from 'mongodb';
 
 // dtos
@@ -16,7 +16,7 @@ import { PageDto } from '@/common/dtos/page.dto';
 
 // services
 import { AuthService } from '@/modules/auth/auth.service';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { MailingService } from '@/modules/mailing/mailing.service';
 // import { UploadService } from '@/modules/upload/upload.service';
 
@@ -25,6 +25,7 @@ import { EXCEPTION_CODE } from '@/constants/exceptionCode';
 import { ERole } from './enums/role.enum';
 import { getMeta } from '@/utils/pagination';
 import { UpdateResult } from '@/common/interfaces/common.interface';
+import { UserNotFoundException } from './exceptions/UserNotFound';
 
 @Injectable()
 export class UsersService {
@@ -123,10 +124,7 @@ export class UsersService {
     });
 
     if (!userFound) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `A user id '"${id}"' was not found`,
-      });
+      throw new UserNotFoundException(id);
     }
 
     const isExist = await this.mailExists(updateUserDto.email, userFound.email);
@@ -156,10 +154,7 @@ export class UsersService {
     );
 
     if (!updateResult.affected) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `A user id '"${id}"' was not found`,
-      });
+      throw new UserNotFoundException(id);
     }
 
     return { success: true };
@@ -197,10 +192,7 @@ export class UsersService {
     const deleteResult = await this.usersRepository.delete(id);
 
     if (!deleteResult.affected) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `A user id '"${id}"' was not found`,
-      });
+      throw new UserNotFoundException(id);
     }
 
     return { success: true };
@@ -213,10 +205,7 @@ export class UsersService {
 
     const userFound = await this.findById(userId);
     if (!userFound) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: 'ID not found',
-      });
+      throw new UserNotFoundException();
     }
     await this.mailService.sendNotiChangedPassword(userFound.email);
 
@@ -238,6 +227,36 @@ export class UsersService {
     }
   }
 
+  searchUsers(query: string) {
+    // const statement = '(user.username LIKE :query)';
+    // return this.usersRepository
+    //   .createQueryBuilder('user')
+    //   .where(statement, { query: `%${query}%` })
+    //   .limit(10)
+    //   .select([
+    //     'user.username',
+    //     'user.firstName',
+    //     'user.lastName',
+    //     'user.email',
+    //     'user.id',
+    //     'user.profile',
+    //   ])
+    //   .getMany();
+
+    console.log('searchUsers: ', query);
+
+    const userFound = this.usersRepository.find({
+      where: {
+        // name: /query/,
+        _id: new ObjectId(query),
+      },
+    });
+
+    if (!userFound) throw new UserNotFoundException();
+
+    return userFound;
+  }
+
   // methods
   async findAll(query: any): Promise<PageDto<User[]>> {
     const sortBy = query.sort_by || 'created_at';
@@ -247,7 +266,19 @@ export class UsersService {
     // const role = user.role;
 
     const options: any = {
-      relations: {},
+      select: [
+        '_id',
+        'email',
+        'role',
+        'address',
+        'birthday',
+        'avatar_url',
+        'phone',
+        'is_active',
+        'note',
+        'reset_token',
+        'reset_token_expiry',
+      ], // TODO: get more if have
       order: { [sortBy]: order },
     };
     if (page && limit) {
@@ -267,10 +298,7 @@ export class UsersService {
 
   async findById(id: string): Promise<User | null> {
     if (!id) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `ID is empty`,
-      });
+      throw new UserNotFoundException();
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -286,7 +314,7 @@ export class UsersService {
   async findByRole(role: ERole): Promise<User[]> {
     if (!role) {
       throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
+        code: EXCEPTION_CODE.USER.ROLE_INVALID,
         message: `Role is empty`,
       });
     }
@@ -296,16 +324,27 @@ export class UsersService {
     });
   }
 
-  async findUserByEmail(email: string): Promise<User | null> {
+  async findUserByEmail(
+    email: string,
+    isIncludePassword = false,
+  ): Promise<User | null> {
+    const userSelects = [
+      '_id',
+      'password',
+      'email',
+      'role',
+      'address',
+      'birthday',
+      'avatar_url',
+      'phone',
+      'is_active',
+      'note',
+      'reset_token',
+      'reset_token_expiry',
+    ].filter((s) => isIncludePassword || s !== 'password');
+
     return await this.usersRepository.findOne({
-      select: [
-        '_id',
-        'password',
-        'email',
-        'role',
-        'reset_token',
-        'reset_token_expiry',
-      ],
+      select: userSelects as FindOptionsSelect<User>,
       where: { email: email },
     });
   }
