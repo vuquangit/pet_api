@@ -52,6 +52,18 @@ export class User {
   @Column({ nullable: true })
   note: string;
 
+  @Column({ nullable: true })
+  peer_id: string;
+
+  // @Column({ nullable: true })
+  // peer: Peer;
+
+  // @Column({ nullable: true })
+  // presence_id: string;
+
+  // @Column({ nullable: true })
+  // presence: UserPresence;
+
   @Column({ type: 'date', nullable: true })
   @IsDate()
   start_date: Date;
