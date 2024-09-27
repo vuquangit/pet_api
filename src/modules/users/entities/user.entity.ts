@@ -32,6 +32,9 @@ export class User {
   @Column()
   name: string;
 
+  @Column({ nullable: true })
+  username: string;
+
   @Column({ select: false })
   password: string;
 
@@ -65,14 +68,6 @@ export class User {
 
   @Column({ nullable: true })
   presence: UserPresence | null;
-
-  @Column({ type: 'date', nullable: true })
-  @IsDate()
-  start_date: Date;
-
-  @Column({ type: 'date', nullable: true })
-  @IsDate()
-  end_date: Date;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

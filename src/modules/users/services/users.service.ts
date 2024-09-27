@@ -122,6 +122,10 @@ export class UsersService {
     id: string,
     updateUserDto: CreateUserDto,
   ): Promise<UpdateResult> {
+    if (!id) {
+      throw new UserNotFoundException();
+    }
+
     const userFound = await this.usersRepository.findOneBy({
       _id: new ObjectId(id),
     });
@@ -153,7 +157,7 @@ export class UsersService {
 
     const updateResult = await this.usersRepository.update(
       id,
-      restUser as User,
+      restUser as unknown as User,
     );
 
     if (!updateResult.affected) {
@@ -220,7 +224,10 @@ export class UsersService {
     resetToken: string,
     resetTokenExpiry: Date,
   ): Promise<void> {
-    const user = await this.findById(userId);
+    const user = await this.findById(userId, [
+      'reset_token',
+      'reset_token_expiry',
+    ]);
     if (user) {
       user.reset_token = resetToken;
       user.reset_token_expiry = resetTokenExpiry; // 1 hour from now
@@ -285,8 +292,6 @@ export class UsersService {
         'phone',
         'is_active',
         'note',
-        'reset_token',
-        'reset_token_expiry',
       ], // TODO: get more if have
       order: { [sortBy]: order },
     };
@@ -305,7 +310,10 @@ export class UsersService {
     };
   }
 
-  async findById(id: string): Promise<User | null> {
+  async findById(
+    id: string,
+    fieldMore: (keyof User)[] = [],
+  ): Promise<User | null> {
     if (!id) {
       throw new UserNotFoundException();
     }
@@ -315,6 +323,22 @@ export class UsersService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...user } = await this.usersRepository.findOne({
       where: { _id: new ObjectId(id) },
+      select: [
+        '_id',
+        'email',
+        'role',
+        'name',
+        'username',
+        'address',
+        'birthday',
+        'avatar_url',
+        'phone',
+        'is_active',
+        'note',
+        'created_at',
+        'updated_at',
+        ...fieldMore,
+      ], // TODO: get more if have
     });
 
     return user as User;
@@ -341,6 +365,7 @@ export class UsersService {
       '_id',
       'password',
       'email',
+      'name',
       'role',
       'address',
       'birthday',
@@ -348,8 +373,6 @@ export class UsersService {
       'phone',
       'is_active',
       'note',
-      'reset_token',
-      'reset_token_expiry',
     ].filter((s) => isIncludePassword || s !== 'password');
 
     return await this.usersRepository.findOne({

@@ -6,7 +6,7 @@ import {
   Post,
   UseGuards,
   Delete,
-  Put,
+  Patch,
   Query,
   UseInterceptors,
   ParseIntPipe,
@@ -18,19 +18,19 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { CreateUserDto } from '@/modules/users/dtos/CreateUser.dto';
-
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 import { UsersService } from '@/modules/users/services/users.service';
 import { User } from '@/modules/users/entities/user.entity';
 import { PageDto } from '@/common/dtos/page.dto';
 import { UpdateResult } from '@/common/interfaces/common.interface';
+import { Routes } from '@/constants/constants';
 
-@Controller()
+@Controller(Routes.USERS)
 @UseGuards(AccessTokenGuard)
 export class UsersController {
   constructor(private userService: UsersService) {}
 
-  @Post('user')
+  @Post()
   @UseInterceptors(
     FileInterceptor('avatar', {
       limits: {
@@ -52,7 +52,7 @@ export class UsersController {
     });
   }
 
-  @Get('users')
+  @Get()
   findAll(
     @Query() query?: any,
     // @Request() req?: { user: User },
@@ -61,12 +61,12 @@ export class UsersController {
     return this.userService.findAll(query);
   }
 
-  @Get('user/:id')
+  @Get(':id')
   findUser(@Param('id') id: string): Promise<User | null> {
     return this.userService.findById(id);
   }
 
-  @Put('user/:id')
+  @Patch(':id')
   @UseInterceptors(
     FileInterceptor('avatar', {
       limits: {
@@ -91,12 +91,12 @@ export class UsersController {
     });
   }
 
-  @Delete('user/:id')
+  @Delete(':id')
   async remove(@Param('id') id: string): Promise<UpdateResult> {
     return await this.userService.remove(id);
   }
 
-  @Get('user/search')
+  @Get('search')
   searchUsers(@Query('query') query: string) {
     console.log(query);
     if (!query)
