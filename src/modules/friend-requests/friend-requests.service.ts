@@ -20,7 +20,7 @@ import { FriendRequestAcceptedException } from './exceptions/FriendRequestAccept
 import { FriendRequestNotFoundException } from './exceptions/FriendRequestNotFound';
 import { FriendRequestPending } from './exceptions/FriendRequestPending';
 import { IFriendRequestService } from './friend-requests';
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 import { EFriendStatus } from './enums/friend.enum';
 
 @Injectable()

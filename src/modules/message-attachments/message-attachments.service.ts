@@ -4,10 +4,10 @@ import { Repository } from 'typeorm';
 
 import { IImageStorageService } from '../image-storage/image-storage';
 import { Services } from '@/constants/constants';
-import { Attachment } from '@/utils/types';
 import { IMessageAttachmentsService } from './message-attachments';
 import { MessageAttachment } from './entities/MessageAttachment';
 import { GroupMessageAttachment } from '@/modules/groups/entities/GroupMessageAttachment';
+import { Attachment } from './interfaces/attachment.interface';
 
 @Injectable()
 export class MessageAttachmentsService implements IMessageAttachmentsService {

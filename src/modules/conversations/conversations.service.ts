@@ -7,13 +7,7 @@ import { IFriendsService } from '@/modules/friends/friends';
 import { UserNotFoundException } from '@/modules/users/exceptions/UserNotFound';
 import { Services } from '@/constants/constants';
 import { Message } from '@/modules/messages/entities/message.entity';
-import { UsersService } from '@/modules/users/users.service';
-import {
-  AccessParams,
-  CreateConversationParams,
-  GetConversationMessagesParams,
-  UpdateConversationParams,
-} from '@/utils/types';
+import { UsersService } from '@/modules/users/services/users.service';
 
 import { IConversationsService } from './conversations';
 import { ConversationExistsException } from './exceptions/ConversationExists';
@@ -22,6 +16,12 @@ import { CreateConversationException } from './exceptions/CreateConversation';
 import { Conversation } from './entities/conversation.entity';
 import { ObjectId } from 'mongodb';
 import { User } from '../users/entities/user.entity';
+import {
+  CreateConversationParams,
+  GetConversationMessagesParams,
+  UpdateConversationParams,
+} from './interfaces/conversation.interface';
+import { AccessParams } from '../groups/interfaces/group';
 // import { getMeta } from '@/utils/pagination';
 // import { PageDto } from '@/common/dtos/page.dto';
 

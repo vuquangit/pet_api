@@ -5,14 +5,14 @@ import {
   HttpStatus,
   Inject,
   Param,
+  Request,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { IConversationsService } from '@/modules/conversations/conversations';
 // import { ConversationNotFoundException } from '@/modules/conversations/exceptions/ConversationNotFound';
 import { Routes, Services } from '@/constants/constants';
-import { AuthUser } from '@/utils/decorators';
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 import { User } from '@/modules/users/entities/user.entity';
 
 @Controller(Routes.EXISTS)
@@ -26,9 +26,10 @@ export class ExistsController {
 
   @Get('conversations/:recipientId')
   async checkConversationExists(
-    @AuthUser() user: User,
+    @Request() req: { user: User },
     @Param('recipientId') recipientId: string,
   ) {
+    const user = req.user;
     const conversation = await this.conversationsService.isCreated(
       recipientId,
       user._id.toString(),

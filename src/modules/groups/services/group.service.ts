@@ -6,19 +6,18 @@ import { IImageStorageService } from '../../image-storage/image-storage';
 import { UserNotFoundException } from '../../users/exceptions/UserNotFound';
 import { Services } from '@/constants/constants';
 // import { generateUUIDV4 } from '@/utils/helpers';
-import {
-  AccessParams,
-  // Attachment,
-  CreateGroupParams,
-  FetchGroupsParams,
-  TransferOwnerParams,
-  UpdateGroupDetailsParams,
-} from '@/utils/types';
 import { GroupNotFoundException } from '../exceptions/GroupNotFound';
 import { GroupOwnerTransferException } from '../exceptions/GroupOwnerTransfer';
-import { IGroupService } from '../interfaces/group';
+import {
+  AccessParams,
+  CreateGroupParams,
+  FetchGroupsParams,
+  IGroupService,
+  TransferOwnerParams,
+  UpdateGroupDetailsParams,
+} from '../interfaces/group';
 import { Group } from '../entities/Group';
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 import { User } from '@/modules/users/entities/user.entity';
 import { ObjectId } from 'mongodb';
 import { GroupMessage } from '../entities/GroupMessage';

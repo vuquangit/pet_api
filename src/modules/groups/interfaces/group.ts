@@ -1,13 +1,7 @@
-// import { Group, User } from '../../utils/typeorm';
-import {
-  AccessParams,
-  CreateGroupParams,
-  FetchGroupsParams,
-  TransferOwnerParams,
-  UpdateGroupDetailsParams,
-} from '@/utils/types';
 import { Group } from '../entities/Group';
 import { User } from '@/modules/users/entities/user.entity';
+import { Attachment } from '@/modules/message-attachments/interfaces/attachment.interface';
+import { Request } from 'express';
 
 export interface IGroupService {
   createGroup(params: CreateGroupParams): any;
@@ -17,4 +11,35 @@ export interface IGroupService {
   hasAccess(params: AccessParams): Promise<User | undefined>;
   transferGroupOwner(params: TransferOwnerParams): Promise<Group>;
   updateDetails(params: UpdateGroupDetailsParams): Promise<Group>;
+}
+
+export interface CreateGroupParams {
+  creator: User;
+  title?: string;
+  users: string[];
+}
+
+export interface FetchGroupsParams {
+  userId: string;
+}
+
+export interface TransferOwnerParams {
+  userId: string;
+  groupId: string;
+  new_owner_id: string;
+}
+
+export interface UpdateGroupDetailsParams {
+  id: string;
+  title?: string;
+  avatar?: Attachment;
+}
+
+export interface AccessParams {
+  id: string;
+  userId: string;
+}
+
+export interface AuthenticatedRequest extends Request {
+  user: User;
 }

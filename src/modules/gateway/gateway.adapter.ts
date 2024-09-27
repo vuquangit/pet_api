@@ -8,10 +8,10 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { AuthenticatedSocket } from '@/utils/interfaces';
+import { AuthenticatedSocket } from '@/modules/gateway/interfaces/gateway.interface';
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 import { CustomSocketExceptionFilter } from './exceptions/ws-exception.filter';
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 
 @UseFilters(CustomSocketExceptionFilter)
 @UseGuards(AccessTokenGuard)

@@ -8,12 +8,12 @@ import { Services } from '@/constants/constants';
 import {
   CreateGroupMessageParams,
   DeleteGroupMessageParams,
-  EditGroupMessageParams,
-} from '@/utils/types';
+} from '../interfaces/group-messages';
 import { IGroupMessageService } from '../interfaces/group-messages';
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 import { GroupMessage } from '../entities/GroupMessage';
 import { Group } from '../entities/Group';
+import { EditGroupMessageParams } from '@/modules/messages/interfaces/message.interface';
 // import { IMessageAttachmentsService } from '../../message-attachments/message-attachments';
 
 @Injectable()
@@ -53,6 +53,8 @@ export class GroupMessageService implements IGroupMessageService {
       //   : [],
     });
     const savedMessage = await this.groupMessageRepository.save(groupMessage);
+    savedMessage.author = author;
+
     group.lastMessageSent = savedMessage;
     const updatedGroup = await this.groupService.saveGroup(group);
     return { message: savedMessage, group: updatedGroup };

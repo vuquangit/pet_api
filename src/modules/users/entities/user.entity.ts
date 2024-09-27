@@ -9,6 +9,8 @@ import {
 import { IsDate } from 'class-validator';
 
 import { ERole } from '@/modules/users/enums/role.enum';
+import { Peer } from './peer.entit';
+import { UserPresence } from './UserPresence';
 
 @Entity({ name: 'users' })
 export class User {
@@ -55,14 +57,14 @@ export class User {
   @Column({ nullable: true })
   peer_id: string;
 
-  // @Column({ nullable: true })
-  // peer: Peer;
+  @Column({ nullable: true })
+  peer: Peer | null;
 
-  // @Column({ nullable: true })
-  // presence_id: string;
+  @Column({ nullable: true })
+  presence_id: string;
 
-  // @Column({ nullable: true })
-  // presence: UserPresence;
+  @Column({ nullable: true })
+  presence: UserPresence | null;
 
   @Column({ type: 'date', nullable: true })
   @IsDate()

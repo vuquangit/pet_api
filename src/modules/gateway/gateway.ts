@@ -15,16 +15,12 @@ import { IConversationsService } from '@/modules/conversations/conversations';
 import { IFriendsService } from '@/modules/friends/friends';
 import { IGroupService } from '@/modules/groups/interfaces/group';
 import { Services, WebsocketEvents } from '@/constants/constants';
-import { AuthenticatedSocket } from '@/utils/interfaces';
 import {
-  AddGroupUserResponse,
+  AuthenticatedSocket,
   CallAcceptedPayload,
   CallHangUpPayload,
-  CreateGroupMessageResponse,
-  CreateMessageResponse,
-  RemoveGroupUserResponse,
   VoiceCallPayload,
-} from '@/utils/types';
+} from '@/modules/gateway/interfaces/gateway.interface';
 import { CreateCallDto } from './dtos/CreateCallDto';
 import { IGatewaySessionManager } from './gateway.session';
 import { Conversation } from '@/modules/conversations/entities/conversation.entity';
@@ -33,6 +29,12 @@ import { Group } from '@/modules/groups/entities/Group';
 import { GroupMessage } from '@/modules/groups/entities/GroupMessage';
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 import { CustomSocketExceptionFilter } from './exceptions/ws-exception.filter';
+import { CreateMessageResponse } from '../messages/interfaces/message.interface';
+import { CreateGroupMessageResponse } from '../groups/interfaces/group-messages';
+import {
+  AddGroupUserResponse,
+  RemoveGroupUserResponse,
+} from '../groups/interfaces/group-recipient';
 
 @WebSocketGateway({
   cors: {

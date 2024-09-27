@@ -7,7 +7,7 @@ import { DeleteFriendRequestParams } from './interfaces/friend.interface';
 import { DeleteFriendException } from './exceptions/DeleteFriend';
 import { FriendNotFoundException } from './exceptions/FriendNotFound';
 import { ObjectId } from 'mongodb';
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 
 @Injectable()
 export class FriendsService {

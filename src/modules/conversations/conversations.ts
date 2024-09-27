@@ -1,12 +1,11 @@
-// import { Conversation, User } from '@/utils/typeorm';
+import { Conversation } from '@/modules/conversations/entities/conversation.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import {
-  AccessParams,
   CreateConversationParams,
   GetConversationMessagesParams,
   UpdateConversationParams,
-} from '@/utils/types';
-import { Conversation } from '@/modules/conversations/entities/conversation.entity';
-import { User } from '@/modules/users/entities/user.entity';
+} from './interfaces/conversation.interface';
+import { AccessParams } from '../groups/interfaces/group';
 
 export interface IConversationsService {
   createConversation(

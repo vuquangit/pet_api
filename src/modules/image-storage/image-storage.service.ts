@@ -4,14 +4,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Services } from '@/constants/constants';
 import { IImageStorageService } from './image-storage';
+import { UploadImageParams } from './interfaces/storage.interface';
+import { UploadGroupMessageAttachmentParams, UploadMessageAttachmentParams } from '../message-attachments/interfaces/attachment.interface';
 // import { S3 } from '@aws-sdk/client-s3';
-import {
-  UploadGroupMessageAttachmentParams,
-  UploadImageParams,
-  UploadMessageAttachmentParams,
-} from '@/utils/types';
 // import { compressImage } from '@/utils/helpers';
-import { GroupMessageAttachment } from '@/utils/typeorm';
+
 
 @Injectable()
 export class ImageStorageService implements IImageStorageService {

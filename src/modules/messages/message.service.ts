@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-// import { instanceToPlain } from 'class-transformer';
 import { Repository } from 'typeorm';
 import { ObjectId } from 'mongodb';
 
@@ -9,20 +8,19 @@ import { ConversationNotFoundException } from '../conversations/exceptions/Conve
 import { FriendNotFoundException } from '../friends/exceptions/FriendNotFound';
 import { IFriendsService } from '../friends/friends';
 import { IMessageAttachmentsService } from '../message-attachments/message-attachments';
-// import { buildFindMessageParams } from '@/utils/builders';
 import { Services } from '@/constants/constants';
 import {
   CreateMessageParams,
   CreateMessageResponse,
   DeleteMessageParams,
   EditMessageParams,
-} from '@/utils/types';
+} from './interfaces/message.interface';
 import { CannotCreateMessageException } from './exceptions/CannotCreateMessage';
 import { CannotDeleteMessage } from './exceptions/CannotDeleteMessage';
 import { IMessageService } from './message';
 import { Message } from './entities/message.entity';
 import { Conversation } from '../conversations/entities/conversation.entity';
-import { UsersService } from '../users/users.service';
+import { UsersService } from '../users/services/users.service';
 
 @Injectable()
 export class MessageService implements IMessageService {

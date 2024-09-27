@@ -14,7 +14,7 @@ import { LoginUserDto } from '@/modules/auth/dtos/LoginUser.dto';
 import { ChangePasswordDto } from '@/modules/auth/dtos/ChangePassword.dto';
 import { ForgotPasswordDto } from '@/modules/auth/dtos/ForgotPassword.dto';
 
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 import { AuthService } from './auth.service';
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 import { RefreshTokenGuard } from '@/modules/auth/guards/refreshToken-auth.guard';

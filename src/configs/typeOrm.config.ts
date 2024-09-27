@@ -12,6 +12,8 @@ import { Conversation } from '@/modules/conversations/entities/conversation.enti
 import { Message } from '@/modules/messages/entities/message.entity';
 import { Group } from '@/modules/groups/entities/Group';
 import { GroupMessage } from '@/modules/groups/entities/GroupMessage';
+import { Peer } from '@/modules/users/entities/peer.entit';
+import { UserPresence } from '@/modules/users/entities/UserPresence';
 
 dotenvConfig({ path: '.env' });
 
@@ -37,6 +39,8 @@ const config: TypeOrmModuleOptions = {
     Message,
     Group,
     GroupMessage,
+    Peer,
+    UserPresence,
   ],
 
   // Only enable this option if your application is in development,

@@ -8,10 +8,10 @@ import {
 import { NextFunction, Response } from 'express';
 
 import { Services } from '@/constants/constants';
-import { AuthenticatedRequest } from '@/utils/types';
 import { IConversationsService } from '../conversations';
 import { ConversationNotFoundException } from '../exceptions/ConversationNotFound';
 import { InvalidConversationIdException } from '../exceptions/InvalidConversationId';
+import { AuthenticatedRequest } from '@/modules/groups/interfaces/group';
 
 @Injectable()
 export class ConversationMiddleware implements NestMiddleware {

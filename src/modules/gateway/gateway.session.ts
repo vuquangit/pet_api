@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuthenticatedSocket } from '@/utils/interfaces';
+import { AuthenticatedSocket } from '@/modules/gateway/interfaces/gateway.interface';
 
 export interface IGatewaySessionManager {
   getUserSocket(id: string): AuthenticatedSocket;

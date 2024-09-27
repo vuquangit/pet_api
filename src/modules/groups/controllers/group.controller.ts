@@ -16,13 +16,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { SkipThrottle } from '@nestjs/throttler';
 
 import { Routes, Services } from '@/constants/constants';
-import { Attachment } from '@/utils/types';
 import { CreateGroupDto } from '../dtos/CreateGroup.dto';
 import { TransferOwnerDto } from '../dtos/TransferOwner.dto';
 import { UpdateGroupDetailsDto } from '../dtos/UpdateGroupDetails.dto';
 import { IGroupService } from '../interfaces/group';
 import { User } from '@/modules/users/entities/user.entity';
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
+import { Attachment } from '@/modules/message-attachments/interfaces/attachment.interface';
 
 @SkipThrottle()
 @Controller(Routes.GROUPS)

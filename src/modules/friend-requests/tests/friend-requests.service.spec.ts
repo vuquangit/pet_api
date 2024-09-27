@@ -1,18 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IUserService } from '../../users/interfaces/user';
-import { UserService } from '../../users/services/user.service';
-import { Services } from '../../utils/constants';
-import { Friend, FriendRequest } from '../../utils/typeorm';
+// import { IUserService } from '../../users/interfaces/user';
+
 import { FriendRequestException } from '../exceptions/FriendRequest';
 import { FriendRequestNotFoundException } from '../exceptions/FriendRequestNotFound';
 import { IFriendRequestService } from '../friend-requests';
 import { FriendRequestService } from '../friend-requests.service';
+import { Friend } from '@/modules/friends/entities/friend.entity';
+import { FriendRequest } from '../entities/friendRequest.entity';
+import { Services } from '@/constants/constants';
+import { UsersService } from '@/modules/users/services/users.service';
 
 describe('FriendRequestsService', () => {
   let friendRequestService: IFriendRequestService;
-  let userService: IUserService;
+  let userService: UsersService;
   let friendRepository: Repository<Friend>;
   let friendRequestRepository: Repository<FriendRequest>;
 
@@ -41,7 +43,7 @@ describe('FriendRequestsService', () => {
     friendRequestService = module.get<IFriendRequestService>(
       Services.FRIENDS_REQUESTS_SERVICE,
     );
-    userService = module.get<IUserService>(Services.USERS);
+    userService = module.get<UsersService>(Services.USERS);
     friendRepository = module.get(getRepositoryToken(Friend));
     friendRequestRepository = module.get(getRepositoryToken(FriendRequest));
   });
@@ -54,7 +56,7 @@ describe('FriendRequestsService', () => {
   });
 
   it('should call getFriendRequests', async () => {
-    await friendRequestService.getFriendRequests(20);
+    await friendRequestService.getFriendRequests('20');
     expect(friendRequestRepository.find).toHaveBeenCalledWith({
       where: [
         {
@@ -71,14 +73,14 @@ describe('FriendRequestsService', () => {
   });
 
   describe('cancel friend request', () => {
-    const mockFriendRequest = { sender: { id: 50 } } as FriendRequest;
+    const mockFriendRequest = { sender_id: '50' } as FriendRequest;
 
     it('should not found the friend request', async () => {
       jest
         .spyOn(friendRequestService, 'findById')
-        .mockImplementationOnce(() => Promise.resolve(undefined));
+        .mockImplementationOnce(() => Promise.resolve(null));
       expect(
-        friendRequestService.cancel({ id: 20, userId: 40 }),
+        friendRequestService.cancel({ id: '20', userId: '40' }),
       ).rejects.toThrow(FriendRequestNotFoundException);
     });
 
@@ -87,7 +89,7 @@ describe('FriendRequestsService', () => {
         .spyOn(friendRequestService, 'findById')
         .mockImplementationOnce(() => Promise.resolve(mockFriendRequest));
       expect(
-        friendRequestService.cancel({ id: 500, userId: 30 }),
+        friendRequestService.cancel({ id: '500', userId: '30' }),
       ).rejects.toThrow(FriendRequestException);
     });
 
@@ -95,7 +97,7 @@ describe('FriendRequestsService', () => {
       jest
         .spyOn(friendRequestService, 'findById')
         .mockImplementationOnce(() => Promise.resolve(mockFriendRequest));
-      await friendRequestService.cancel({ id: 321, userId: 50 });
+      await friendRequestService.cancel({ id: '321', userId: '50' });
       expect(friendRequestRepository.delete).toHaveBeenCalledWith(322);
     });
   });

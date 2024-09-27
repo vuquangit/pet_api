@@ -20,7 +20,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateUserDto } from '@/modules/users/dtos/CreateUser.dto';
 
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 import { User } from '@/modules/users/entities/user.entity';
 import { PageDto } from '@/common/dtos/page.dto';
 import { UpdateResult } from '@/common/interfaces/common.interface';
@@ -96,7 +96,7 @@ export class UsersController {
     return await this.userService.remove(id);
   }
 
-  @Get('users/search')
+  @Get('user/search')
   searchUsers(@Query('query') query: string) {
     console.log(query);
     if (!query)

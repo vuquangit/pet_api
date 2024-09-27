@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SkipThrottle } from '@nestjs/throttler';
@@ -13,7 +14,6 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { IConversationsService } from './conversations';
 import { CreateConversationDto } from './dtos/CreateConversation.dto';
 import { Routes, Services } from '@/constants/constants';
-import { AuthUser } from '@/utils/decorators';
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 import { User } from '@/modules/users/entities/user.entity';
 
@@ -33,9 +33,10 @@ export class ConversationsController {
 
   @Post()
   async createConversation(
-    @AuthUser() user: User,
+    @Request() req: { user: User },
     @Body() createConversationPayload: CreateConversationDto,
   ) {
+    const user = req.user;
     console.log('createConversation');
     const conversation = await this.conversationsService.createConversation(
       user,
@@ -46,7 +47,8 @@ export class ConversationsController {
   }
 
   @Get()
-  async getConversations(@AuthUser() user: User) {
+  async getConversations(@Request() req: { user: User }) {
+    const user = req.user;
     const id = user._id.toString();
     return this.conversationsService.getConversations(id);
   }

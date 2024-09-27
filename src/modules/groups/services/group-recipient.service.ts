@@ -1,18 +1,18 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 
 import { Services } from '@/constants/constants';
-import {
-  AddGroupRecipientParams,
-  CheckUserGroupParams,
-  LeaveGroupParams,
-  RemoveGroupRecipientParams,
-} from '@/utils/types';
 import { GroupNotFoundException } from '../exceptions/GroupNotFound';
 import { GroupParticipantNotFound } from '../exceptions/GroupParticipantNotFound';
 import { NotGroupOwnerException } from '../exceptions/NotGroupOwner';
 import { IGroupService } from '../interfaces/group';
-import { IGroupRecipientService } from '../interfaces/group-recipient';
-import { UsersService } from '@/modules/users/users.service';
+import {
+  AddGroupRecipientParams,
+  CheckUserGroupParams,
+  IGroupRecipientService,
+  LeaveGroupParams,
+  RemoveGroupRecipientParams,
+} from '../interfaces/group-recipient';
+import { UsersService } from '@/modules/users/services/users.service';
 import { EXCEPTION_CODE } from '@/constants/exceptionCode';
 
 @Injectable()

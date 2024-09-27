@@ -3,7 +3,7 @@ import {
   CreateMessageResponse,
   DeleteMessageParams,
   EditMessageParams,
-} from '@/utils/types';
+} from './interfaces/message.interface';
 import { Message } from './entities/message.entity';
 
 export interface IMessageService {

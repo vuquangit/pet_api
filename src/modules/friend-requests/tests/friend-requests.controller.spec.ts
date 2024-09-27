@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Services } from '../../utils/constants';
-import { mockUser } from '../../__mocks__';
+import { Services } from '@/constants/constants';
+import { mockUser } from '@/__mocks__';
 import { IFriendRequestService } from '../friend-requests';
 import { FriendRequestController } from '../friend-requests.controller';
 
@@ -35,20 +35,23 @@ describe('FriendRequestsController', () => {
   });
 
   it('should call friendRequestService.getFriendRequests', async () => {
-    await controller.getFriendRequests(mockUser);
+    await controller.getFriendRequests({ user: mockUser });
     expect(friendRequestService.getFriendRequests).toHaveBeenCalled();
     expect(friendRequestService.getFriendRequests).toHaveBeenCalledWith(
-      mockUser.id,
+      mockUser._id.toString(),
     );
   });
 
   it('should call createFriendRequest with correct params', async () => {
-    await controller.createFriendRequest(mockUser, {
-      email: 'anson@gmail.com',
-    });
+    await controller.createFriendRequest(
+      { user: mockUser },
+      {
+        request_id: 'xxxxxxxxxxxxxxxxxxxxxxx',
+      },
+    );
     expect(friendRequestService.create).toHaveBeenCalledWith({
       user: mockUser,
-      email: 'anson@gmail.com',
+      request_id: 'xxxxxxxxxxxxxxxxxxxxxxx',
     });
   });
 });

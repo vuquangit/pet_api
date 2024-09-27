@@ -14,7 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { User } from '@/modules/users/entities/user.entity';
 
 import { MailingService } from '@/modules/mailing/mailing.service';
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 import { LoginUserDto } from '@/modules/auth/dtos/LoginUser.dto';
 import { ChangePasswordDto } from '@/modules/auth/dtos/ChangePassword.dto';
 import { ForgotPasswordDto } from '@/modules/auth/dtos/ForgotPassword.dto';

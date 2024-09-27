@@ -22,10 +22,11 @@ import { MailingService } from '@/modules/mailing/mailing.service';
 
 // others
 import { EXCEPTION_CODE } from '@/constants/exceptionCode';
-import { ERole } from './enums/role.enum';
+import { ERole } from '../enums/role.enum';
 import { getMeta } from '@/utils/pagination';
 import { UpdateResult } from '@/common/interfaces/common.interface';
-import { UserNotFoundException } from './exceptions/UserNotFound';
+import { UserNotFoundException } from '../exceptions/UserNotFound';
+import { UserPresence } from '../entities/UserPresence';
 
 @Injectable()
 export class UsersService {
@@ -34,6 +35,8 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
 
     @Inject(forwardRef(() => AuthService)) private authService: AuthService,
+    @InjectRepository(UserPresence)
+    private readonly userPresenceRepository: Repository<UserPresence>,
 
     private mailService: MailingService,
     // private uploadService: UploadService,
@@ -255,6 +258,12 @@ export class UsersService {
     if (!userFound) throw new UserNotFoundException();
 
     return userFound;
+  }
+
+  createPresence(): Promise<UserPresence> {
+    return this.userPresenceRepository.save(
+      this.userPresenceRepository.create(),
+    );
   }
 
   // methods
