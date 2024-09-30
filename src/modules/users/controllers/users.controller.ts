@@ -61,6 +61,14 @@ export class UsersController {
     return this.userService.findAll(query);
   }
 
+  @Get('search')
+  searchUsers(@Query('query') query: string) {
+    console.log(query);
+    if (!query)
+      throw new HttpException('Provide a valid query', HttpStatus.BAD_REQUEST);
+    return this.userService.searchUsers(query);
+  }
+
   @Get(':id')
   findUser(@Param('id') id: string): Promise<User | null> {
     return this.userService.findById(id);
@@ -94,13 +102,5 @@ export class UsersController {
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<UpdateResult> {
     return await this.userService.remove(id);
-  }
-
-  @Get('search')
-  searchUsers(@Query('query') query: string) {
-    console.log(query);
-    if (!query)
-      throw new HttpException('Provide a valid query', HttpStatus.BAD_REQUEST);
-    return this.userService.searchUsers(query);
   }
 }

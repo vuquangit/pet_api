@@ -253,12 +253,21 @@ export class UsersService {
     //   ])
     //   .getMany();
 
-    console.log('searchUsers: ', query);
-
     const userFound = this.usersRepository.find({
       where: {
-        // name: /query/,
-        _id: new ObjectId(query),
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        $or: [
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          { name: { $regex: query } },
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          { username: { $regex: query } },
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          { email: { $regex: query } },
+        ],
       },
     });
 
@@ -318,30 +327,31 @@ export class UsersService {
       throw new UserNotFoundException();
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...user } = await this.usersRepository.findOne({
-      where: { _id: new ObjectId(id) },
-      select: [
-        '_id',
-        'email',
-        'role',
-        'name',
-        'username',
-        'address',
-        'birthday',
-        'avatar_url',
-        'phone',
-        'is_active',
-        'note',
-        'created_at',
-        'updated_at',
-        ...fieldMore,
-      ], // TODO: get more if have
-    });
-
-    return user as User;
+    try {
+      return await this.usersRepository.findOne({
+        where: { _id: new ObjectId(id) },
+        select: [
+          '_id',
+          'email',
+          'role',
+          'name',
+          'username',
+          'address',
+          'birthday',
+          'avatar_url',
+          'phone',
+          'is_active',
+          'note',
+          'created_at',
+          'updated_at',
+          ...fieldMore,
+          // TODO: get more if have
+        ],
+      });
+    } catch (error) {
+      console.log('findById error:', error);
+      throw new UserNotFoundException();
+    }
   }
 
   async findByRole(role: ERole): Promise<User[]> {
