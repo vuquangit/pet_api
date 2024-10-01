@@ -1,3 +1,4 @@
+import { User } from '../entities/user.entity';
 import { ERole } from '../enums/role.enum';
 
 export interface IUser {
@@ -7,3 +8,8 @@ export interface IUser {
   password?: string;
   role: ERole;
 }
+
+export type UpdateStatusMessageParams = {
+  user: User;
+  status_message: string;
+};

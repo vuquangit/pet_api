@@ -11,10 +11,10 @@ import { JwtService } from '@nestjs/jwt';
 
 import { IUserToken } from '@/modules/auth/interfaces/auth.interface';
 import { ConfigService } from '@nestjs/config';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 
 import { MailingService } from '@/modules/mailing/mailing.service';
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 import { LoginUserDto } from '@/modules/auth/dtos/LoginUser.dto';
 import { ChangePasswordDto } from '@/modules/auth/dtos/ChangePassword.dto';
 import { ForgotPasswordDto } from '@/modules/auth/dtos/ForgotPassword.dto';
@@ -23,6 +23,7 @@ import { UpdateResult } from '@/common/interfaces/common.interface';
 import { RegisterDto } from './dtos/Register.dto';
 import { ERole } from '../users/enums/role.enum';
 import { CreateUserDto } from '../users/dtos/CreateUser.dto';
+import { UserNotFoundException } from '../users/exceptions/UserNotFound';
 
 @Injectable()
 export class AuthService {
@@ -37,7 +38,10 @@ export class AuthService {
   ) {}
 
   async login(loginUserDto: LoginUserDto): Promise<IUserToken> {
-    const user = await this.usersService.findUserByEmail(loginUserDto.email);
+    const user = await this.usersService.findUserByEmail(
+      loginUserDto.email,
+      true,
+    );
     if (!user) {
       throw new NotFoundException({
         code: EXCEPTION_CODE.USER.EMAIL_NOT_FOUND,
@@ -59,10 +63,7 @@ export class AuthService {
 
     const userFound = await this.usersService.findById(user._id.toString());
     if (!userFound) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: 'ID not found',
-      });
+      throw new UserNotFoundException();
     }
     return await this.generateTokens(userFound);
   }
@@ -77,10 +78,7 @@ export class AuthService {
   async refreshToken(user: User): Promise<any> {
     const userFound = await this.usersService.findById(user._id.toString());
     if (!userFound) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: 'ID not found',
-      });
+      throw new UserNotFoundException();
     }
     return await this.generateTokens(userFound);
   }
@@ -91,10 +89,7 @@ export class AuthService {
   ): Promise<UpdateResult> {
     const userFound = await this.usersService.findUserByEmail(user.email);
     if (!userFound) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: 'ID not found',
-      });
+      throw new UserNotFoundException();
     }
 
     const passwordsMatches = await this.validatePassword(

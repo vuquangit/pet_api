@@ -7,7 +7,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 import { ObjectId } from 'mongodb';
 
 // dtos
@@ -16,15 +16,17 @@ import { PageDto } from '@/common/dtos/page.dto';
 
 // services
 import { AuthService } from '@/modules/auth/auth.service';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { MailingService } from '@/modules/mailing/mailing.service';
 // import { UploadService } from '@/modules/upload/upload.service';
 
 // others
 import { EXCEPTION_CODE } from '@/constants/exceptionCode';
-import { ERole } from './enums/role.enum';
+import { ERole } from '../enums/role.enum';
 import { getMeta } from '@/utils/pagination';
 import { UpdateResult } from '@/common/interfaces/common.interface';
+import { UserNotFoundException } from '../exceptions/UserNotFound';
+import { UserPresence } from '../entities/UserPresence';
 
 @Injectable()
 export class UsersService {
@@ -33,6 +35,8 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
 
     @Inject(forwardRef(() => AuthService)) private authService: AuthService,
+    @InjectRepository(UserPresence)
+    private readonly userPresenceRepository: Repository<UserPresence>,
 
     private mailService: MailingService,
     // private uploadService: UploadService,
@@ -118,15 +122,16 @@ export class UsersService {
     id: string,
     updateUserDto: CreateUserDto,
   ): Promise<UpdateResult> {
+    if (!id) {
+      throw new UserNotFoundException();
+    }
+
     const userFound = await this.usersRepository.findOneBy({
       _id: new ObjectId(id),
     });
 
     if (!userFound) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `A user id '"${id}"' was not found`,
-      });
+      throw new UserNotFoundException(id);
     }
 
     const isExist = await this.mailExists(updateUserDto.email, userFound.email);
@@ -152,14 +157,11 @@ export class UsersService {
 
     const updateResult = await this.usersRepository.update(
       id,
-      restUser as User,
+      restUser as unknown as User,
     );
 
     if (!updateResult.affected) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `A user id '"${id}"' was not found`,
-      });
+      throw new UserNotFoundException(id);
     }
 
     return { success: true };
@@ -197,10 +199,7 @@ export class UsersService {
     const deleteResult = await this.usersRepository.delete(id);
 
     if (!deleteResult.affected) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `A user id '"${id}"' was not found`,
-      });
+      throw new UserNotFoundException(id);
     }
 
     return { success: true };
@@ -213,10 +212,7 @@ export class UsersService {
 
     const userFound = await this.findById(userId);
     if (!userFound) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: 'ID not found',
-      });
+      throw new UserNotFoundException();
     }
     await this.mailService.sendNotiChangedPassword(userFound.email);
 
@@ -228,7 +224,10 @@ export class UsersService {
     resetToken: string,
     resetTokenExpiry: Date,
   ): Promise<void> {
-    const user = await this.findById(userId);
+    const user = await this.findById(userId, [
+      'reset_token',
+      'reset_token_expiry',
+    ]);
     if (user) {
       user.reset_token = resetToken;
       user.reset_token_expiry = resetTokenExpiry; // 1 hour from now
@@ -236,6 +235,51 @@ export class UsersService {
     } else {
       throw new Error('User not found');
     }
+  }
+
+  searchUsers(query: string) {
+    // const statement = '(user.username LIKE :query)';
+    // return this.usersRepository
+    //   .createQueryBuilder('user')
+    //   .where(statement, { query: `%${query}%` })
+    //   .limit(10)
+    //   .select([
+    //     'user.username',
+    //     'user.firstName',
+    //     'user.lastName',
+    //     'user.email',
+    //     'user.id',
+    //     'user.profile',
+    //   ])
+    //   .getMany();
+
+    const userFound = this.usersRepository.find({
+      where: {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        $or: [
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          { name: { $regex: query } },
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          { username: { $regex: query } },
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          { email: { $regex: query } },
+        ],
+      },
+    });
+
+    if (!userFound) throw new UserNotFoundException();
+
+    return userFound;
+  }
+
+  createPresence(): Promise<UserPresence> {
+    return this.userPresenceRepository.save(
+      this.userPresenceRepository.create(),
+    );
   }
 
   // methods
@@ -247,7 +291,17 @@ export class UsersService {
     // const role = user.role;
 
     const options: any = {
-      relations: {},
+      select: [
+        '_id',
+        'email',
+        'role',
+        'address',
+        'birthday',
+        'avatar_url',
+        'phone',
+        'is_active',
+        'note',
+      ], // TODO: get more if have
       order: { [sortBy]: order },
     };
     if (page && limit) {
@@ -265,28 +319,45 @@ export class UsersService {
     };
   }
 
-  async findById(id: string): Promise<User | null> {
+  async findById(
+    id: string,
+    fieldMore: (keyof User)[] = [],
+  ): Promise<User | null> {
     if (!id) {
-      throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
-        message: `ID is empty`,
-      });
+      throw new UserNotFoundException();
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...user } = await this.usersRepository.findOne({
-      where: { _id: new ObjectId(id) },
-    });
-
-    return user as User;
+    try {
+      return await this.usersRepository.findOne({
+        where: { _id: new ObjectId(id) },
+        select: [
+          '_id',
+          'email',
+          'role',
+          'name',
+          'username',
+          'address',
+          'birthday',
+          'avatar_url',
+          'phone',
+          'is_active',
+          'note',
+          'created_at',
+          'updated_at',
+          ...fieldMore,
+          // TODO: get more if have
+        ],
+      });
+    } catch (error) {
+      console.log('findById error:', error);
+      throw new UserNotFoundException();
+    }
   }
 
   async findByRole(role: ERole): Promise<User[]> {
     if (!role) {
       throw new NotFoundException({
-        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
+        code: EXCEPTION_CODE.USER.ROLE_INVALID,
         message: `Role is empty`,
       });
     }
@@ -296,16 +367,26 @@ export class UsersService {
     });
   }
 
-  async findUserByEmail(email: string): Promise<User | null> {
+  async findUserByEmail(
+    email: string,
+    isIncludePassword = false,
+  ): Promise<User | null> {
+    const userSelects = [
+      '_id',
+      'password',
+      'email',
+      'name',
+      'role',
+      'address',
+      'birthday',
+      'avatar_url',
+      'phone',
+      'is_active',
+      'note',
+    ].filter((s) => isIncludePassword || s !== 'password');
+
     return await this.usersRepository.findOne({
-      select: [
-        '_id',
-        'password',
-        'email',
-        'role',
-        'reset_token',
-        'reset_token_expiry',
-      ],
+      select: userSelects as FindOptionsSelect<User>,
       where: { email: email },
     });
   }

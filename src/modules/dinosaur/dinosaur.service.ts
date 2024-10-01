@@ -15,8 +15,8 @@ import { CreateDinosaurDto } from '@/modules/dinosaur/dtos/CreateDinosaur.dto';
 import { PageDto } from '@/common/dtos/page.dto';
 
 // services
-import { Dinosaur } from '@/modules/dinosaur/entity/dinosaur.entity';
-import { UsersService } from '@/modules/users/users.service';
+import { Dinosaur } from '@/modules/dinosaur/entities/dinosaur.entity';
+import { UsersService } from '@/modules/users/services/users.service';
 
 // others
 import { EXCEPTION_CODE } from '@/constants/exceptionCode';

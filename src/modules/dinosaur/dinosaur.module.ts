@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { DinosaurService } from './dinosaur.service';
 import { DinosaurController } from './dinosaur.controller';
-import { Dinosaur } from './entity/dinosaur.entity';
+import { Dinosaur } from './entities/dinosaur.entity';
 import { UsersModule } from '@/modules/users/users.module';
 
 @Module({
