@@ -40,7 +40,6 @@ import {
   cors: {
     // origin: ['http://localhost:3000'],
     origin: '*',
-    credentials: true,
   },
   pingInterval: 10000,
   pingTimeout: 15000,

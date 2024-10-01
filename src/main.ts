@@ -23,7 +23,6 @@ async function bootstrap() {
     // origin: 'http://localhost:3000', // Your frontend URL
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    // credentials: true, // Allow cookies to be sent
     allowedHeaders: 'Content-Type, Accept, Authorization',
   });
   app.useGlobalInterceptors(new HttpResponseInterceptor());
