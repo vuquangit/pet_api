@@ -13,7 +13,7 @@ import { CreateDinosaurDto } from '@/modules/dinosaur/dtos/CreateDinosaur.dto';
 
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 import { DinosaurService } from '@/modules/dinosaur/dinosaur.service';
-import { Dinosaur } from '@/modules/dinosaur/entity/dinosaur.entity';
+import { Dinosaur } from '@/modules/dinosaur/entities/dinosaur.entity';
 import { PageDto } from '@/common/dtos/page.dto';
 import { UpdateResult } from '@/common/interfaces/common.interface';
 

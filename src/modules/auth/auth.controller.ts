@@ -14,14 +14,15 @@ import { LoginUserDto } from '@/modules/auth/dtos/LoginUser.dto';
 import { ChangePasswordDto } from '@/modules/auth/dtos/ChangePassword.dto';
 import { ForgotPasswordDto } from '@/modules/auth/dtos/ForgotPassword.dto';
 
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 import { AuthService } from './auth.service';
 import { AccessTokenGuard } from '@/modules/auth/guards/accessToken-auth.guard';
 import { RefreshTokenGuard } from '@/modules/auth/guards/refreshToken-auth.guard';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { IUserToken } from './interfaces/auth.interface';
 import { UpdateResult } from '@/common/interfaces/common.interface';
 import { RegisterDto } from './dtos/Register.dto';
+import { ProfileNotFoundException } from './exceptions/ProfileNotFoundException';
 
 @Controller('auth')
 export class AuthController {
@@ -46,8 +47,16 @@ export class AuthController {
   @UseGuards(AccessTokenGuard)
   @Get('profile')
   async getProfile(@Request() req: { user: User }): Promise<User | null> {
-    const id = req.user._id.toString();
-    return await this.userService.findById(id);
+    try {
+      const id = req.user._id.toString();
+      const userFound = await this.userService.findById(id);
+      if (!userFound) throw new ProfileNotFoundException();
+
+      return userFound;
+    } catch (error) {
+      console.log('getProfile:', error);
+      throw new ProfileNotFoundException();
+    }
   }
 
   @UseGuards(AccessTokenGuard)

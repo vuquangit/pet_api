@@ -3,9 +3,9 @@ import { HttpService } from '@nestjs/axios';
 
 import { EXCEPTION_CODE } from '@/constants/exceptionCode';
 import { IUserToken } from '@/modules/auth/interfaces/auth.interface';
-import { UsersService } from '@/modules/users/users.service';
+import { UsersService } from '@/modules/users/services/users.service';
 import { AuthService } from '@/modules/auth/auth.service';
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { OauthLoginAppDto } from './dtos/OauthLogin.dto';
 
 @Injectable()

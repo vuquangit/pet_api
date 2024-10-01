@@ -8,7 +8,9 @@ import {
 } from 'typeorm';
 import { IsDate } from 'class-validator';
 
-import { ERole } from '../enums/role.enum';
+import { ERole } from '@/modules/users/enums/role.enum';
+import { Peer } from './peer.entit';
+import { UserPresence } from './UserPresence';
 
 @Entity({ name: 'users' })
 export class User {
@@ -29,6 +31,9 @@ export class User {
 
   @Column()
   name: string;
+
+  @Column({ nullable: true })
+  username: string;
 
   @Column({ select: false })
   password: string;
@@ -52,13 +57,17 @@ export class User {
   @Column({ nullable: true })
   note: string;
 
-  @Column({ type: 'date', nullable: true })
-  @IsDate()
-  start_date: Date;
+  @Column({ nullable: true })
+  peer_id: string;
 
-  @Column({ type: 'date', nullable: true })
-  @IsDate()
-  end_date: Date;
+  @Column({ nullable: true })
+  peer: Peer | null;
+
+  @Column({ nullable: true })
+  presence_id: string;
+
+  @Column({ nullable: true })
+  presence: UserPresence | null;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

@@ -3,7 +3,7 @@ import { define } from 'typeorm-seeding';
 // @ts-ignore
 import Faker from 'faker';
 
-import { User } from '@/modules/users/entity/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 // import { ERole } from '@/modules/users/enums/role.enum';
 
 define(User, (faker: typeof Faker) => {
