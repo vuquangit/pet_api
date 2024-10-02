@@ -8,6 +8,7 @@ import { DeleteFriendException } from './exceptions/DeleteFriend';
 import { FriendNotFoundException } from './exceptions/FriendNotFound';
 import { ObjectId } from 'mongodb';
 import { UsersService } from '@/modules/users/services/users.service';
+import { User } from '@/modules/users/entities/user.entity';
 
 @Injectable()
 export class FriendsService {
@@ -15,6 +16,8 @@ export class FriendsService {
     @InjectRepository(Friend)
     private readonly friendsRepository: Repository<Friend>,
     private readonly userService: UsersService,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
   ) {}
 
   async getFriends(id: string): Promise<Friend[]> {
@@ -31,13 +34,25 @@ export class FriendsService {
     // ],
     // });
 
-    const friend_1 = await this.friendsRepository.find({
-      where: { sender_id: id },
+    const friendList = await this.friendsRepository.find({
+      where: {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        $or: [
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          { sender_id: id },
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          { receiver_id: id },
+        ],
+      },
     });
-    // relations
-    if (friend_1.length > 0) {
+
+    // get relations
+    if (friendList.length > 0) {
       await Promise.all(
-        friend_1.map(async (friend) => {
+        friendList.map(async (friend) => {
           const userSenderFound = await this.userService.findById(
             friend.sender_id,
           );
@@ -49,29 +64,71 @@ export class FriendsService {
         }),
       );
     }
-
-    const friend_2 = await this.friendsRepository.find({
-      where: { receiver_id: id },
-    });
-    // relations
-    if (friend_2.length > 0) {
-      await Promise.all(
-        friend_2.map(async (friend) => {
-          const userSenderFound = await this.userService.findById(
-            friend.sender_id,
-          );
-          const userReceiverFound = await this.userService.findById(
-            friend.receiver_id,
-          );
-          friend.sender = userSenderFound;
-          friend.receiver = userReceiverFound;
-        }),
-      );
-    }
-
-    const friendList = [...friend_1, ...friend_2];
 
     return friendList;
+  }
+
+  async searchFriends(userId: string, query: string) {
+    // console.log('searchUsers: ', userId, query);
+
+    const friendFounds = await this.friendsRepository.find({
+      where: {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        $or: [
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          { sender_id: userId },
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          { receiver_id: userId },
+        ],
+      },
+    });
+
+    console.log('search users', friendFounds);
+
+    const userFound = this.usersRepository.find({
+      where: {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        $and: [
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          {
+            _id: {
+              $in: friendFounds.map(
+                (friend) =>
+                  new ObjectId(
+                    friend.sender_id === userId
+                      ? friend.receiver_id
+                      : friend.sender_id,
+                  ),
+              ),
+            },
+          },
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          {
+            $or: [
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              { name: { $regex: query, $options: 'i' } },
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              { username: { $regex: query, $options: 'i' } },
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              { email: { $regex: query, $options: 'i' } },
+            ],
+          },
+        ],
+      },
+    });
+
+    // if (!friendFounds) throw new UserNotFoundException();
+
+    return userFound;
   }
 
   async findFriendById(id: string): Promise<Friend | null> {

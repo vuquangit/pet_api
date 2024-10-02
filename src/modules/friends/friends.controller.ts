@@ -2,8 +2,11 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Inject,
   Param,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -30,6 +33,16 @@ export class FriendsController {
     const user = req.user;
     const id = user._id.toString();
     return this.friendsService.getFriends(id);
+  }
+
+  @Get('search')
+  searchUsers(@Request() req: { user: User }, @Query('query') query: string) {
+    if (!query)
+      throw new HttpException('Provide a valid query', HttpStatus.BAD_REQUEST);
+
+    const user = req.user;
+    const userId = user._id.toString();
+    return this.friendsService.searchFriends(userId, query);
   }
 
   @Delete(':id/delete')

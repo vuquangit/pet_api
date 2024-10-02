@@ -6,4 +6,5 @@ export interface IFriendsService {
   findFriendById(id: string): Promise<Friend>;
   deleteFriend(params: any): DeleteFriendRequestParams;
   isFriends(userOneId: string, userTwoId: string): Promise<Friend | undefined>;
+  searchFriends(userId: string, query: string): Promise<Friend[]>;
 }

@@ -52,15 +52,24 @@ export class ConversationsService implements IConversationsService {
     //   .orWhere('recipient.id = :id', { id })
     //   .orderBy('conversation.lastMessageSentAt', 'DESC')
     //   .getMany();
-    const conversations_1 = await this.conversationRepository.find({
+    const conversationFounds = await this.conversationRepository.find({
       where: {
-        creator_id: id,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        $or: [
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          { creator_id: id },
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          { recipient_id: id },
+        ],
       },
     });
 
-    if (conversations_1.length > 0) {
+    if (conversationFounds.length > 0) {
       await Promise.all(
-        conversations_1.map(async (conversation) => {
+        conversationFounds.map(async (conversation) => {
           const creatorFound = await this.userService.findById(
             conversation.creator_id,
           );
@@ -73,28 +82,29 @@ export class ConversationsService implements IConversationsService {
       );
     }
 
-    const conversations_2 = await this.conversationRepository.find({
-      where: {
-        recipient_id: id,
-      },
-    });
+    // const conversations_2 = await this.conversationRepository.find({
+    //   where: {
+    //     recipient_id: id,
+    //   },
+    // });
 
-    if (conversations_2.length > 0) {
-      await Promise.all(
-        conversations_2.map(async (conversation) => {
-          const creatorFound = await this.userService.findById(
-            conversation.creator_id,
-          );
-          const recipientFound = await this.userService.findById(
-            conversation.recipient_id,
-          );
-          conversation.creator = creatorFound;
-          conversation.recipient = recipientFound;
-        }),
-      );
-    }
+    // if (conversations_2.length > 0) {
+    //   await Promise.all(
+    //     conversations_2.map(async (conversation) => {
+    //       const creatorFound = await this.userService.findById(
+    //         conversation.creator_id,
+    //       );
+    //       const recipientFound = await this.userService.findById(
+    //         conversation.recipient_id,
+    //       );
+    //       conversation.creator = creatorFound;
+    //       conversation.recipient = recipientFound;
+    //     }),
+    //   );
+    // }
 
-    return [...conversations_1, ...conversations_2];
+    // return [...conversations_1, ...conversations_2];
+    return conversationFounds;
   }
 
   async findById(id: string) {
@@ -126,33 +136,23 @@ export class ConversationsService implements IConversationsService {
   }
 
   async isCreated(userId: string, recipientId: string) {
-    // return this.conversationRepository.findOne({
-    //   where: [
-    //     {
-    //       creator: { id: userId },
-    //       recipient: { id: recipientId },
-    //     },
-    //     {
-    //       creator: { id: recipientId },
-    //       recipient: { id: userId },
-    //     },
-    //   ],
-    // });
-
-    const exists_1 = await this.conversationRepository.findOne({
+    const exists = await this.conversationRepository.find({
       where: {
-        creator_id: userId,
-        recipient_id: recipientId,
-      },
-    });
-    const exists_2 = await this.conversationRepository.findOne({
-      where: {
-        creator_id: recipientId,
-        recipient_id: userId,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        $or: [
+          {
+            creator_id: userId,
+            recipient_id: recipientId,
+          },
+          {
+            creator_id: recipientId,
+            recipient_id: userId,
+          },
+        ],
       },
     });
 
-    const exists = [exists_1, exists_2].filter(Boolean);
     return exists.length > 0;
   }
 
@@ -194,7 +194,12 @@ export class ConversationsService implements IConversationsService {
     });
     await this.messageRepository.save(newMessage);
 
-    return conversation;
+    return {
+      ...conversation,
+      creator,
+      recipient,
+      messages: [newMessage],
+    };
   }
 
   async hasAccess({ id, userId }: AccessParams) {

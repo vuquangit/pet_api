@@ -110,7 +110,13 @@ export class FriendRequestService implements IFriendRequestService {
       receiver_id: receiver._id.toString(),
       status: EFriendStatus.PENDING,
     });
-    return this.friendRequestRepository.save(friend);
+    const newFriendRequest = await this.friendRequestRepository.save(friend);
+
+    return {
+      ...newFriendRequest,
+      sender,
+      receiver,
+    };
   }
 
   async accept({ id, userId }: FriendRequestParams) {
@@ -157,6 +163,7 @@ export class FriendRequestService implements IFriendRequestService {
     };
   }
 
+  // methods
   async isPending(userOneId: string, userTwoId: string): Promise<boolean> {
     const exists_1 = await this.friendRequestRepository.findOne({
       where: {
