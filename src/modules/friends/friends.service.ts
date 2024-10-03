@@ -86,8 +86,6 @@ export class FriendsService {
       },
     });
 
-    console.log('search users', friendFounds);
-
     const userFound = this.usersRepository.find({
       where: {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

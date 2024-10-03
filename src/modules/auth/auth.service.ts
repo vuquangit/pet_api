@@ -212,7 +212,6 @@ export class AuthService {
       is_delete_avatar: false,
       is_active: true,
     } as CreateUserDto;
-    console.log('newUser', newUser);
     return await this.usersService.create(newUser);
   }
 

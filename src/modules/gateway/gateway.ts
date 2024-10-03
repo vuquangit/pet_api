@@ -371,7 +371,10 @@ export class MessagingGateway
     console.log('onVideoCallInitiate');
     const caller = socket.user;
     const receiverSocket = this.sessions.getUserSocket(data.recipientId);
-    if (!receiverSocket) socket.emit('onUserUnavailable');
+    if (!receiverSocket) {
+      socket.emit('onUserUnavailable');
+      return;
+    }
     receiverSocket.emit('onVideoCall', { ...data, caller });
   }
 
@@ -434,7 +437,10 @@ export class MessagingGateway
   ) {
     const caller = socket.user;
     const receiverSocket = this.sessions.getUserSocket(payload.recipientId);
-    if (!receiverSocket) socket.emit('onUserUnavailable');
+    if (!receiverSocket) {
+      socket.emit('onUserUnavailable');
+      return;
+    }
     receiverSocket.emit('onVoiceCall', { ...payload, caller });
   }
 
