@@ -2,14 +2,12 @@ import { IsNotEmpty, IsEmail } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ERole } from '../enums/role.enum';
 
-export class CreateUserDto {
+export class UpdateUserDto {
   @ApiProperty()
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
+  // @IsEmail()
+  email?: string;
 
   @ApiProperty()
-  @IsNotEmpty()
   role: ERole;
 
   @ApiProperty({
@@ -47,8 +45,9 @@ export class CreateUserDto {
   })
   birthday: Date | null;
 
-  @ApiProperty()
-  @IsNotEmpty()
+  @ApiProperty({
+    default: true,
+  })
   is_active: boolean;
 
   @ApiProperty()

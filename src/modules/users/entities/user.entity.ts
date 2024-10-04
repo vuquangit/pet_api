@@ -42,6 +42,9 @@ export class User {
   avatar_url: string;
 
   @Column({ nullable: true })
+  avatar_public_id?: string;
+
+  @Column({ nullable: true })
   address: string;
 
   @Column({ nullable: true })

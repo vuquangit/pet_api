@@ -18,7 +18,7 @@ import { PageDto } from '@/common/dtos/page.dto';
 import { AuthService } from '@/modules/auth/auth.service';
 import { User } from '@/modules/users/entities/user.entity';
 import { MailingService } from '@/modules/mailing/mailing.service';
-// import { UploadService } from '@/modules/upload/upload.service';
+import { IImageStorageService } from '@/modules/image-storage/image-storage';
 
 // others
 import { EXCEPTION_CODE } from '@/constants/exceptionCode';
@@ -27,6 +27,9 @@ import { getMeta } from '@/utils/pagination';
 import { UpdateResult } from '@/common/interfaces/common.interface';
 import { UserNotFoundException } from '../exceptions/UserNotFound';
 import { UserPresence } from '../entities/UserPresence';
+import { Services } from '@/constants/constants';
+import { UpdateUserDto } from '../dtos/UpdateUser.dto';
+import { UploadException } from '@/modules/image-storage/exceptions/UploadError';
 
 @Injectable()
 export class UsersService {
@@ -39,7 +42,8 @@ export class UsersService {
     private readonly userPresenceRepository: Repository<UserPresence>,
 
     private mailService: MailingService,
-    // private uploadService: UploadService,
+    @Inject(Services.IMAGE_UPLOAD_SERVICE)
+    private readonly imageStorageService: IImageStorageService,
   ) {}
 
   // USERS
@@ -70,6 +74,7 @@ export class UsersService {
     // Overwrite the user password with the hash, to store it in the db
     createdUserDto.password = passwordHash;
 
+    // convert 'null' to null
     ['birthday', 'start_date', 'end_date'].forEach(
       (fieldDate: keyof CreateUserDto) => {
         if (createdUserDto[fieldDate] === 'null')
@@ -81,28 +86,15 @@ export class UsersService {
 
     // upload avatar
     if (createdUserDto.avatar) {
-      // TODO: upload image
-      const avatar_url = '';
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { avatar, ...restUserDto } = createdUserDto;
+      const dataUpload = await this.imageStorageService.upload(
+        createdUserDto.avatar,
+      );
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const user: User = { ...restUserDto, avatar_url };
-      return await this.saveUser(user);
-
-      // return this.uploadService.uploadImage(createdUserDto.avatar).pipe(
-      //   switchMap((data: any) => {
-      //     createdUserDto.avatar_url = data.image_url;
-      //     delete createdUserDto.avatar;
-      //     return this.saveUser(createdUserDto, passwordUser);
-      //   }),
-      // );
-    } else {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      return await this.saveUser(createdUserDto as User);
+      createdUserDto.avatar_url = dataUpload.url;
+      createdUserDto.avatar_public_id = dataUpload.public_id;
     }
+
+    return await this.saveUser(createdUserDto as unknown as User);
   }
 
   private async saveUser(createdUserDto: User): Promise<User> {
@@ -120,103 +112,99 @@ export class UsersService {
 
   async update(
     id: string,
-    updateUserDto: CreateUserDto,
-  ): Promise<UpdateResult> {
-    if (!id) {
-      throw new UserNotFoundException();
+    updateUserDto: UpdateUserDto,
+  ): Promise<UpdateResult | undefined> {
+    if (!id) throw new UserNotFoundException();
+
+    const userFound = await this.usersRepository.findOne({
+      where: {
+        _id: new ObjectId(id),
+      },
+    });
+    if (!userFound) throw new UserNotFoundException(id);
+
+    if (updateUserDto.email && updateUserDto.email !== userFound.email) {
+      const isExist = await this.mailExists(
+        updateUserDto.email,
+        userFound.email,
+      );
+
+      if (isExist) {
+        throw new ConflictException({
+          code: EXCEPTION_CODE.USER.EMAIL_EXIST,
+          message: 'Email already in use',
+        });
+      }
     }
 
-    const userFound = await this.usersRepository.findOneBy({
-      _id: new ObjectId(id),
+    ['birthday'].forEach((fieldDate: keyof CreateUserDto) => {
+      if (updateUserDto[fieldDate] === 'null')
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        updateUserDto[fieldDate] = null;
     });
 
-    if (!userFound) {
-      throw new UserNotFoundException(id);
+    // upload avatar
+    try {
+      if (!updateUserDto.is_delete_avatar && updateUserDto.avatar) {
+        const dataUpload = await this.imageStorageService.upload(
+          updateUserDto.avatar,
+        );
+
+        // delete old image
+        userFound.avatar_public_id &&
+          (await this.imageStorageService.delete(userFound.avatar_public_id));
+
+        updateUserDto.avatar_url = dataUpload.url;
+        updateUserDto.avatar_public_id = dataUpload.public_id;
+      } else if (updateUserDto.is_delete_avatar && updateUserDto.avatar_url) {
+        this.imageStorageService.delete(updateUserDto.avatar_url);
+        updateUserDto.avatar_url = null;
+      }
+    } catch (err) {
+      console.log('Upload image error: ', err);
+      throw new UploadException(err);
     }
-
-    const isExist = await this.mailExists(updateUserDto.email, userFound.email);
-
-    if (isExist) {
-      throw new ConflictException({
-        code: EXCEPTION_CODE.USER.EMAIL_EXIST,
-        message: 'Email already in use',
-      });
-    }
-
-    ['birthday', 'start_date', 'end_date'].forEach(
-      (fieldDate: keyof CreateUserDto) => {
-        if (updateUserDto[fieldDate] === 'null')
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          updateUserDto[fieldDate] = null;
-      },
-    );
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { avatar, is_delete_avatar, ...restUser } = updateUserDto;
-
-    const updateResult = await this.usersRepository.update(
-      id,
-      restUser as unknown as User,
-    );
-
-    if (!updateResult.affected) {
-      throw new UserNotFoundException(id);
-    }
+    await this.usersRepository.update(id, restUser as unknown as User);
 
     return { success: true };
-
-    // // TODO: upload avatar
-    // if (updateUserDto.avatar) {
-    //   return this.uploadService.uploadImage(updateUserDto.avatar).pipe(
-    //     switchMap((data: any) => {
-    //       // TODO: delete image ?
-    //       this.uploadService.deleteImage([updateUserDto.avatar_url]);
-
-    //       updateUserDto.avatar_url = data.image_url;
-    //       delete updateUserDto.avatar;
-    //       delete updateUserDto.is_delete_avatar;
-
-    //       return this.usersRepository.update(id, updateUserDto);
-    //     }),
-    //   );
-    // } else {
-    //   // TODO: delete image
-    //   if (updateUserDto.is_delete_avatar) {
-    //     this.uploadService.deleteImage([updateUserDto.avatar_url]);
-    //     updateUserDto.avatar_url = null;
-    //   }
-
-    //   delete updateUserDto.is_delete_avatar;
-
-    //   return this.usersRepository.update(id, updateUserDto);
-    // }
   }
 
   async remove(id: string): Promise<UpdateResult> {
-    // TODO: delete avatar
+    const userFound = await this.findById(id);
+    await this.usersRepository.delete(id);
 
-    const deleteResult = await this.usersRepository.delete(id);
-
-    if (!deleteResult.affected) {
-      throw new UserNotFoundException(id);
-    }
+    // delete old image
+    userFound?.avatar_public_id &&
+      (await this.imageStorageService.delete(userFound.avatar_public_id));
 
     return { success: true };
   }
 
   async updatePassword(userData: User): Promise<boolean> {
     const userId = userData._id.toString();
-
-    await this.usersRepository.update(userId, userData);
-
     const userFound = await this.findById(userId);
     if (!userFound) {
       throw new UserNotFoundException();
     }
+
+    await this.usersRepository.update(userId, userData);
+
     await this.mailService.sendNotiChangedPassword(userFound.email);
 
     return true;
+  }
+
+  async updateUser(userData: User): Promise<UpdateResult> {
+    const userId = userData._id.toString();
+    const userFound = await this.findById(userId);
+    if (!userFound) throw new UserNotFoundException();
+
+    await this.usersRepository.update(userId, userData);
+    return { success: true };
   }
 
   async updateResetToken(

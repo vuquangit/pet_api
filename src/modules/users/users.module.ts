@@ -13,7 +13,7 @@ import { UserPresenceService } from './services/user-presence.service';
 import { UserPresenceController } from './controllers/user-presence.controller';
 import { Peer } from './entities/peer.entit';
 import { UserPresence } from './entities/UserPresence';
-// import { UploadModule } from '@/modules/upload/upload.module';
+import { ImageStorageModule } from '@/modules/image-storage/image-storage.module';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { UserPresence } from './entities/UserPresence';
     forwardRef(() => AuthModule),
     HttpModule,
     MailingModule,
-    // UploadModule,
+    ImageStorageModule,
   ],
   controllers: [UsersController, UserPresenceController],
   providers: [

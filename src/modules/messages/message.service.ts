@@ -35,6 +35,7 @@ export class MessageService implements IMessageService {
     private readonly friendsService: IFriendsService,
     private readonly userService: UsersService,
   ) {}
+
   async createMessage(
     params: CreateMessageParams,
   ): Promise<CreateMessageResponse> {

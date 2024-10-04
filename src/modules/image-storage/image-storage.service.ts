@@ -1,37 +1,61 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable prettier/prettier */
+import { Injectable } from '@nestjs/common';
+import { v2 as cloudinary } from 'cloudinary';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const streamifier = require('streamifier');
 
-import { Inject, Injectable } from '@nestjs/common';
-import { Services } from '@/constants/constants';
 import { IImageStorageService } from './image-storage';
-import { UploadImageParams } from './interfaces/storage.interface';
-import { UploadGroupMessageAttachmentParams, UploadMessageAttachmentParams } from '../message-attachments/interfaces/attachment.interface';
-// import { S3 } from '@aws-sdk/client-s3';
-// import { compressImage } from '@/utils/helpers';
+import {
+  CloudinaryResponse,
+  UploadImageParams,
+} from './interfaces/storage.interface';
+import {
+  UploadGroupMessageAttachmentParams,
+  UploadMessageAttachmentParams,
+} from '../message-attachments/interfaces/attachment.interface';
+import { UploadException } from './exceptions/UploadError';
 
+// import { compressImage } from '@/utils/image';
 
 @Injectable()
 export class ImageStorageService implements IImageStorageService {
-  // constructor(
-  //   @Inject(Services.SPACES_CLIENT)
-  //   private readonly spacesClient: S3,
-  // ) {}
+  constructor() {}
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  upload(params: UploadImageParams): any {
-    return 'uploaded';
+  upload(file: UploadImageParams): Promise<CloudinaryResponse> {
+    try {
+      return new Promise<CloudinaryResponse>((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'petisland.icu',
+            // upload_preset: 'ml_default',
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            resolve(result);
+          },
+        );
 
-    // return this.spacesClient.putObject({
-    //   Bucket: 'chuachat',
-    //   Key: params.key,
-    //   Body: params.file.buffer,
-    //   ACL: 'public-read',
-    //   ContentType: params.file.mimetype,
-    // });
+        streamifier.createReadStream(file.buffer).pipe(uploadStream);
+      });
+    } catch (err) {
+      console.log('Upload image error: ', err);
+      throw new UploadException(err);
+    }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async uploadMessageAttachment(params: UploadMessageAttachmentParams): Promise<any> {
+  async delete(publicId: string) {
+    return await cloudinary.uploader.destroy(publicId);
+  }
+
+  async deletes(publicId: string[]) {
+    return await cloudinary.api.delete_resources(publicId);
+  }
+
+  async uploadMessageAttachment(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    params: UploadMessageAttachmentParams,
+  ): Promise<any> {
     return 'uploadMessageAttachment';
 
     // this.spacesClient.putObject({
@@ -52,8 +76,9 @@ export class ImageStorageService implements IImageStorageService {
   }
 
   async uploadGroupMessageAttachment(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     params: UploadGroupMessageAttachmentParams,
-  // ): Promise<GroupMessageAttachment> {
+    // ): Promise<GroupMessageAttachment> {
   ): Promise<any> {
     // this.spacesClient.putObject({
     //   Bucket: 'chuachat',

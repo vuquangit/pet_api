@@ -24,6 +24,7 @@ import { User } from '@/modules/users/entities/user.entity';
 import { PageDto } from '@/common/dtos/page.dto';
 import { UpdateResult } from '@/common/interfaces/common.interface';
 import { Routes } from '@/constants/constants';
+import { UpdateUserDto } from '../dtos/UpdateUser.dto';
 
 @Controller(Routes.USERS)
 @UseGuards(AccessTokenGuard)
@@ -40,7 +41,7 @@ export class UsersController {
   )
   create(
     @Body() createdUserDto: CreateUserDto,
-    @UploadedFile() avatar: any,
+    @UploadedFile() avatar: Express.Multer.File,
     @Body('role', ParseIntPipe) role: number,
     @Body('is_active', ParseBoolPipe) is_active: boolean,
   ): Promise<User> {
@@ -84,12 +85,12 @@ export class UsersController {
   )
   updateUser(
     @Param('id') id: string,
-    @Body() updateUserDto: CreateUserDto,
-    @UploadedFile() avatar: any,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() avatar: Express.Multer.File,
     @Body('role', ParseIntPipe) role: any,
     @Body('is_active', ParseBoolPipe) is_active: boolean,
     @Body('is_delete_avatar', ParseBoolPipe) is_delete_avatar: boolean,
-  ): Promise<UpdateResult> {
+  ): Promise<UpdateResult | undefined> {
     return this.userService.update(id, {
       ...updateUserDto,
       role,

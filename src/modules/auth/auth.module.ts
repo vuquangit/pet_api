@@ -7,8 +7,9 @@ import { RefreshTokenStrategy } from './strategies/refreshToken.strategy';
 
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UsersModule } from '../users/users.module';
-import { MailingModule } from '../mailing/mailing.module';
+import { UsersModule } from '@/modules/users/users.module';
+import { MailingModule } from '@/modules/mailing/mailing.module';
+import { ImageStorageModule } from '@/modules/image-storage/image-storage.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { MailingModule } from '../mailing/mailing.module';
     JwtModule.register({}),
     forwardRef(() => UsersModule),
     forwardRef(() => MailingModule),
+    ImageStorageModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, AccessTokenStrategy, RefreshTokenStrategy],

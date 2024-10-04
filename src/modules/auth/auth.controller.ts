@@ -8,7 +8,11 @@ import {
   UseGuards,
   Inject,
   forwardRef,
+  UploadedFile,
+  UseInterceptors,
+  Patch,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import { LoginUserDto } from '@/modules/auth/dtos/LoginUser.dto';
 import { ChangePasswordDto } from '@/modules/auth/dtos/ChangePassword.dto';
@@ -98,5 +102,23 @@ export class AuthController {
   @HttpCode(200)
   async register(@Body() registerDto: RegisterDto): Promise<any> {
     return await this.authService.register(registerDto);
+  }
+
+  @Patch('change-avatar')
+  @UseGuards(AccessTokenGuard)
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      limits: {
+        fieldSize: 5120,
+      },
+    }),
+  )
+  async changeAvatar(
+    @Request() req: { user: User },
+    @UploadedFile() avatar: Express.Multer.File,
+  ): Promise<any> {
+    const user = req.user;
+    const userId = user._id.toString();
+    return await this.authService.changeAvatar(userId, avatar);
   }
 }

@@ -4,10 +4,15 @@ import {
   UploadMessageAttachmentParams,
   UploadGroupMessageAttachmentParams,
 } from '../message-attachments/interfaces/attachment.interface';
-import { UploadImageParams } from './interfaces/storage.interface';
+import {
+  CloudinaryResponse,
+  UploadImageParams,
+} from './interfaces/storage.interface';
 
 export interface IImageStorageService {
-  upload(params: UploadImageParams): any;
+  upload(params: UploadImageParams): Promise<CloudinaryResponse>;
+  delete(id: string): Promise<any>;
+  deletes(ids: string[]): Promise<any>;
   uploadMessageAttachment(
     params: UploadMessageAttachmentParams,
   ): Promise<MessageAttachment>;

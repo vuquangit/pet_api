@@ -24,6 +24,8 @@ import { RegisterDto } from './dtos/Register.dto';
 import { ERole } from '../users/enums/role.enum';
 import { CreateUserDto } from '../users/dtos/CreateUser.dto';
 import { UserNotFoundException } from '../users/exceptions/UserNotFound';
+import { Services } from '@/constants/constants';
+import { IImageStorageService } from '../image-storage/image-storage';
 
 @Injectable()
 export class AuthService {
@@ -33,8 +35,12 @@ export class AuthService {
 
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
+
     @Inject(forwardRef(() => MailingService))
     private mailService: MailingService,
+
+    @Inject(Services.IMAGE_UPLOAD_SERVICE)
+    private readonly imageStorageService: IImageStorageService,
   ) {}
 
   async login(loginUserDto: LoginUserDto): Promise<IUserToken> {
@@ -213,6 +219,25 @@ export class AuthService {
       is_active: true,
     } as CreateUserDto;
     return await this.usersService.create(newUser);
+  }
+
+  async changeAvatar(
+    userId: string,
+    avatar: Express.Multer.File,
+  ): Promise<UpdateResult> {
+    const userFound = await this.usersService.findById(userId);
+    if (!userFound) {
+      throw new NotFoundException({
+        code: EXCEPTION_CODE.USER.ID_NOT_FOUND,
+        message: 'id user not found',
+      });
+    }
+
+    const dataUpload = await this.imageStorageService.upload(avatar);
+    userFound.avatar_url = dataUpload.url;
+    userFound.avatar_public_id = dataUpload.public_id;
+
+    return await this.usersService.updateUser(userFound);
   }
 
   // METHODS

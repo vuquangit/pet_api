@@ -8,7 +8,12 @@ import { APP_GUARD } from '@nestjs/core';
 
 import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
-import { mailerConfig, mongoConfig, typeOrmMongo } from '@/configs';
+import {
+  mailerConfig,
+  mongoConfig,
+  typeOrmMongo,
+  CloudinaryProvider,
+} from '@/configs';
 import { ThrottlerBehindProxyGuard } from '@/utils/throttler';
 
 import { AuthModule } from '@/modules/auth/auth.module';
@@ -66,6 +71,7 @@ import { GatewayModule } from '@/modules/gateway/gateway.module';
       provide: APP_GUARD,
       useClass: ThrottlerBehindProxyGuard,
     },
+    CloudinaryProvider,
   ],
 })
 export class AppModule {}
